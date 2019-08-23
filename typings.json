@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "amqplib": "registry:dt/amqplib#0.5.0+20170118062225",
+    "bluebird": "registry:dt/bluebird#3.5.0+20170323165310",
+    "body-parser": "registry:dt/body-parser#1.16.0+20170321201455",
+    "express": "registry:dt/express#4.0.0+20170118060322",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#4.0.0+20170324160323",
+    "mime": "registry:dt/mime#0.0.0+20160428043022",
+    "multer": "registry:dt/multer#0.0.0+20170119150739",
+    "redis": "registry:dt/redis#0.12.2+20170209165924",
+    "serve-static": "registry:dt/serve-static#1.7.1+20161128184045"
+  },
+  "globalDependencies": {
+    "es6-shim": "registry:dt/es6-shim#0.31.2+20160726072212",
+    "node": "registry:dt/node#7.0.0+20170322231424"
+  }
+}

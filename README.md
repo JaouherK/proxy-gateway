@@ -1,4 +1,4 @@
-#### A Microservices API Gateway Built Using Express.js and Express Middleware
+#### A Microservices API Gateway Built Using Typescript
 ----
 
 Proxy Gateway is an API gateway that hovers over microservices or serverless architecture. It is completely dissociated from the stack used for the other services. It secures and exposes your services with a complete control over all its functionality and behaviour.

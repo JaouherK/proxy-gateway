@@ -62,6 +62,10 @@ this will initialize the database and its tables if not exist. It will also expo
 #### Contribution
 All contributions welcome! Please see the [contributor's guide](contributor-guide)& [code of conduct](CODE_OF_CONDUCT.md)
 
+#### Report security issue
+
+Please check [security](SECURITY.md)
+
 #### License
 
 [MIT License](LICENSE)

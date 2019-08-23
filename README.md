@@ -58,8 +58,8 @@ $ yarn start
 this will initialize the database and its tables if not exist. It will also expose initially the Manager and health check routes. Use the Postman collection to start creating your routing system.
 
 #### Contribution
-All contributions welcome! Please see the [contributor's guide][contributor-guide]
+All contributions welcome! Please see the [contributor's guide](contributor-guide)
 
 #### License
 
-[MIT License][LICENSE]
+[MIT License](LICENSE)

@@ -17,9 +17,11 @@ This repository exposes an API interface to manage these routs. A frontend inter
 - Integrates with frontend library
 - Processes authenticated and public 
 - Included a Postman collection to start testing your API interface
+- Logging for major requests and incidents with levels of seriousness
+- Logging uses tags to easily be fetched through logs grabber 
 
 #### Installation
-If you have Node.js already installed:
+After having installed Node globally, execute the following command:
 
 ```bash
 $ git clone git@github.com:JaouherK/proxy-gateway.git
@@ -27,4 +29,37 @@ $ cd proxy-gateway
 $ npm install
 ```
 
+#### Configuration
 
+In your db server currently only mysql(but easily changes to any of the following: mariadb,sqlite,postgres,mssql) and create a database like ```gateway```.
+
+Open the config file within ```src``` folder and update the needed values 
+
+```javascript
+const defaultConfig = {
+    port: 3232,  //the port that will be used to expose the app
+    jsonLimit: '20mb',
+    dialect:"mysql",
+    host: "localhost",
+    database: "gateway",
+    username: "root",
+    password: "password",
+};
+```
+
+#### Ignition
+
+Execute the following command to start the server:
+```bash
+$ yarn build
+$ yarn start
+```
+
+this will initialize the database and its tables if not exist. It will also expose initially the Manager and health check routes. Use the Postman collection to start creating your routing system.
+
+#### Contribution
+All contributions welcome! Please see the [contributor's guide][contributor-guide]
+
+#### License
+
+[MIT License][LICENSE]

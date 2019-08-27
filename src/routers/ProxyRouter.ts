@@ -58,14 +58,14 @@ export class ProxyRouter {
 
                 // this is mostly for logging reasons (can be used to decorate the data response)
                 userResDecorator(proxyRes, proxyResData, userReq, userRes) {
-                    const data = JSON.parse(proxyResData.toString('utf8'));
+                    const data = {data: proxyResData.toString('utf8')};
                     logger.log({
                         message: userReq.originalUrl + ' requested' + logAuth + ' routed to ' + prox.endpointUrl,
                         body: userReq.body,
-                        response: JSON.parse(proxyResData),
+                        response: data,
                         tag: prox.namespace
                     });
-                    return JSON.stringify(data);
+                    return proxyResData;
                 }
             }));
         }
@@ -89,6 +89,10 @@ export class ProxyRouter {
 
     // build url from array of strings
     private static buildUrl(route: string[], params: string): string {
-        return route.join('/') + '?' + params;
+        if (params) {
+            return route.join('/') + '?' + params;
+        } else {
+            return route.join('/');
+        }
     }
 }

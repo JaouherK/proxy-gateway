@@ -25,7 +25,7 @@ app.get('/_healthcheck', function (req, res) {
 // Administration
 app.use('/manager', ManagerRouter);
 
-// advanced APIS proxy
+// advanced APIs proxy
 ProxyList.getAllProxyMappings().then((proxies: ProxyProcessData[]) => {
         proxies.forEach((prox: ProxyProcessData) => {
             app.use(prox.url, ProxyRouter.getRouter(prox, logger));

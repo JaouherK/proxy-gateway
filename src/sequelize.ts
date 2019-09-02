@@ -13,5 +13,6 @@ export const sequelize = new Sequelize({
     database: confDatabase,
     username: confUsername,
     password: confPassword,
-    modelPaths: [__dirname + '/models']
+    modelPaths: [__dirname + '/models'],
+    logging: false
 });

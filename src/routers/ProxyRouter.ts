@@ -1,4 +1,4 @@
-import {NextFunction, Request, Response, Router} from 'express';
+import {Request, Response, Router} from 'express';
 import {ProxyProcessData} from "../api/ProxyProcessData";
 import proxy = require("express-http-proxy");
 import {JsonConsoleLogger} from "../logger/jsonConsoleLogger";
@@ -19,7 +19,7 @@ export class ProxyRouter {
 
         // manage if this is a mock
         if (prox.integrationType === 'MOCK') {
-            router.use((req: Request, res: Response, next: NextFunction) => {
+            router.use((req: Request, res: Response) => {
                 logger.log({
                     message: prox.url + ' (mocked route) requested' + logAuth,
                     body: req.body,
@@ -52,12 +52,12 @@ export class ProxyRouter {
                     return prefix + endPoint;
                 },
 
-                filter(req: Request, res: Response) {
+                filter(req: Request) {
                     return req.method === prox.method;
                 },
 
                 // this is mostly for logging reasons (can be used to decorate the data response)
-                userResDecorator(proxyRes, proxyResData, userReq, userRes) {
+                userResDecorator(proxyRes, proxyResData, userReq) {
                     const data = {data: proxyResData.toString('utf8')};
                     logger.log({
                         message: userReq.originalUrl + ' requested' + logAuth + ' routed to ' + prox.endpointUrl,
@@ -73,7 +73,7 @@ export class ProxyRouter {
     }
 
     // resolve route that are expecting parameters with incoming params
-    // this will through extraparameterds that are not mapped in target
+    // this will through extra parameters that are not mapped in target
     private static paramsResolver(route: string[], params: string[]): string [] {
         return route.map((element) => {
             // regex test that starts with :

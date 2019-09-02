@@ -5,7 +5,6 @@ import {Resources} from "../../models/Resources";
 import {MethodsProcessData, SupportedMethods} from "../../api/MethodsProcessData";
 import validator from "validator";
 import {InputValidationException} from "../../exceptions/InputValidationException";
-import {Namespaces} from "../../models/Namespaces";
 import {NotFoundException} from "../../exceptions/NotFoundException";
 
 
@@ -76,14 +75,8 @@ export class MethodsHandler {
         try {
             const apiData = req.body;
 
-            if (!validator.isUUID(apiData.namespacesId)) {
-                throw new InputValidationException('Invalid namespace ID: ' + req.url);
-            }
             if (!validator.isUUID(apiData.resourcesId)) {
                 throw new InputValidationException('Invalid resource ID: ' + req.url);
-            }
-            if (!(await this.existNamespace(apiData.namespacesId))) {
-                throw new NotFoundException('Namespace not found: ' + req.url);
             }
             if (!(await this.existResource(apiData.resourcesId))) {
                 throw new NotFoundException('Resource not found: ' + req.url);
@@ -163,11 +156,6 @@ export class MethodsHandler {
 
     private async existResource(resourceId: string): Promise<boolean> {
         const counter = await Resources.count({where: {'id': resourceId}});
-        return (counter !== 0)
-    }
-
-    private async existNamespace(namespacesId: string): Promise<boolean> {
-        const counter = await Namespaces.count({where: {'id': namespacesId}});
         return (counter !== 0)
     }
 

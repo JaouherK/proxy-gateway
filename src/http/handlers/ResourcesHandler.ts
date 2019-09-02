@@ -71,7 +71,7 @@ export class ResourcesHandler {
                 throw new NotFoundException('Namespace not found: ' + req.url);
             }
             if (!apiData.hasOwnProperty("id")) {
-                if (!(await this.uniqueResource(apiData.path, apiData.namespacesId))) {
+                if (!(await this.uniqueResource(apiData.path, apiData.namespacesId, apiData.resourcesId))) {
                     throw new InputValidationException('Resource already exists for current namespace');
                 }
                 const uuid = require('uuid-v4');
@@ -231,12 +231,20 @@ export class ResourcesHandler {
         return roots;
     }
 
-    private async uniqueResource(resource: string, namespacesId: string): Promise<boolean> {
+    private async uniqueResource(path: string, namespacesId: string, resourcesId: string): Promise<boolean> {
+        await Resources.findAll({
+            where: {
+                'path': path,
+                'namespacesId': namespacesId,
+                'resourcesId': resourcesId
+            }, logging: console.log
+        });
         const counter = await Resources.count(
             {
                 where: {
-                    'path': resource,
-                    'namespacesId': namespacesId
+                    'path': path,
+                    'namespacesId': namespacesId,
+                    'resourcesId': resourcesId
                 }
             }
         );

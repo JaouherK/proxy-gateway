@@ -57,7 +57,7 @@ router.post('/namespaces', async (req: Request, res: Response) => {
 // delete an namespace by id
 router.delete('/namespaces/:api', async (req: Request, res: Response) => {
     const api = req.params.api;
-    await namespaceHandler.deleteOne(req, res, api);
+    await namespaceHandler.deleteRecursiveOne(req, res, api);
 });
 
 // delete a namespace by id (recursive)

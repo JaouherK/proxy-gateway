@@ -15,7 +15,7 @@ export class ResourcesHandler {
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Resources.findAll({include: [Methods]});
-            const arr: ResourcesProcessData[] = [];
+            const response: ResourcesProcessData[] = [];
 
             process.forEach((value: any) => {
                 const aux = new ResourcesProcessData(
@@ -26,9 +26,11 @@ export class ResourcesHandler {
                     value.methods,
                     value.childResources
                 );
-                arr.push(aux);
+                response.push(aux);
             });
-            res.send(arr);
+            res.send(response);
+
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -40,7 +42,9 @@ export class ResourcesHandler {
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             Resources.destroy({where: {id}});
-            res.sendStatus(200);
+            const response = {delete: true};
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -63,11 +67,12 @@ export class ResourcesHandler {
                     apiData.resourcesId,
                     apiData.path
                 ));
-            const value = await Resources.findById(apiData.id);
-            if (value === null) {
+            const response = await Resources.findByPk(apiData.id);
+            if (response === null) {
                 throw new Error("An error occurred. Resource not found");
             } else {
-                res.send(value);
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             }
         } catch (e) {
             this.logger.logError({
@@ -79,20 +84,22 @@ export class ResourcesHandler {
 
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
-            const item = await Resources.findById(id, {
-                    include: [Resources, Methods]
-                });
-
+            const item = await Resources.findByPk(id, {
+                include: [Resources, Methods]
+            });
 
             if (item !== null) {
-                res.send(new ResourcesProcessData(
+                const response = new ResourcesProcessData(
                     item.namespacesId,
                     item.id,
                     item.resourcesId,
                     item.path,
                     item.methods,
                     item.childResources
-                ));
+                );
+                res.send(response);
+
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
                 throw new Error("resource not found");
             }
@@ -125,9 +132,10 @@ export class ResourcesHandler {
                 ));
             });
 
+            const response = this.list_to_tree(container);
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
 
-
-            res.send(this.list_to_tree(container));
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -138,13 +146,14 @@ export class ResourcesHandler {
 
     public async getByIdMethods(req: Request, res: Response, id: string): Promise<any> {
         try {
-            const item = await Resources.findById(id, {
+            const response = await Resources.findByPk(id, {
                 include: [Methods]
             });
 
 
-            if (item !== null) {
-                res.send(item);
+            if (response !== null) {
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
                 throw new Error("resource not found");
             }

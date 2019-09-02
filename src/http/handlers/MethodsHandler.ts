@@ -16,7 +16,7 @@ export class MethodsHandler {
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Methods.findAll({include: [Resources]});
-            const arr: MethodsProcessData[] = [];
+            const response: MethodsProcessData[] = [];
 
             process.forEach((value: any) => {
                 const aux = new MethodsProcessData(
@@ -38,9 +38,11 @@ export class MethodsHandler {
                     value.mockResponseContent,
                     value.active
                 );
-                arr.push(aux);
+                response.push(aux);
             });
-            res.send(arr);
+            res.send(response);
+
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e.message
@@ -52,7 +54,9 @@ export class MethodsHandler {
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             Methods.destroy({where: {id}});
-            res.sendStatus(200);
+            const response = {delete: true};
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -89,11 +93,12 @@ export class MethodsHandler {
                     apiData.active,
                 )
             );
-            const value = await Methods.findById(apiData.id);
-            if (value === null) {
+            const response = await Methods.findByPk(apiData.id);
+            if (response === null) {
                 throw new Error("An error occurred. Method not found");
             } else {
-                res.send(value);
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             }
         } catch (e) {
             this.logger.logError({
@@ -105,9 +110,10 @@ export class MethodsHandler {
 
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
-            const value = await Methods.findById(id, {include: [Resources]});
-            if (value !== null) {
-                res.send(value);
+            const response = await Methods.findByPk(id, {include: [Resources]});
+            if (response !== null) {
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
                 throw new Error("Method not found");
             }

@@ -4,7 +4,6 @@ import {ProxyProcessData} from "../../api/ProxyProcessData";
 import {Proxies} from "../../models/Proxies";
 
 
-
 export class ProxyHandler {
     protected logger: JsonConsoleLogger;
 
@@ -20,7 +19,7 @@ export class ProxyHandler {
                     ['order', 'DESC']
                 ],
             });
-            const arr: ProxyProcessData[] = [];
+            const response: ProxyProcessData[] = [];
 
             process.forEach((value: any) => {
                 const aux = new ProxyProcessData(
@@ -41,9 +40,10 @@ export class ProxyHandler {
                     value.mockResponseContent,
                     value.order
                 );
-                arr.push(aux);
+                response.push(aux);
             });
-            res.send(arr);
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -60,7 +60,7 @@ export class ProxyHandler {
                     ['order', 'DESC']
                 ],
             });
-            const arr: ProxyProcessData[] = [];
+            const response: ProxyProcessData[] = [];
             process.forEach((value: any) => {
                 const aux = new ProxyProcessData(
                     value.id,
@@ -80,9 +80,10 @@ export class ProxyHandler {
                     value.mockResponseContent,
                     value.order
                 );
-                arr.push(aux);
+                response.push(aux);
             });
-            res.send(arr);
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -105,7 +106,9 @@ export class ProxyHandler {
                 Proxies.upsert(element);
             });
 
-            res.send({save: true});
+            const response = {save: true};
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e

@@ -18,8 +18,9 @@ export class NamespacesHandler {
 
     public async startAll(req: Request, res: Response): Promise<any> {
         try {
-            this.logger.logSecurity('♥ FailSafe restart');
-            process.exit(1);
+            this.logger.logSecurity('♥ FailSafe reloading routes');
+            res.sendStatus(200);
+            process.kill(process.pid);
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -30,8 +31,10 @@ export class NamespacesHandler {
 
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
-            const process = await Namespaces.findAll();
-            res.send(process);
+            const response = await Namespaces.findAll();
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -43,7 +46,9 @@ export class NamespacesHandler {
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             Namespaces.destroy({where: {id}});
-            res.sendStatus(200);
+            const response = {delete: true};
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -66,7 +71,9 @@ export class NamespacesHandler {
             await Resources.destroy({where: {namespacesId: id}});
 
             Namespaces.destroy({where: {id}});
-            res.sendStatus(200);
+            const response = {delete: true};
+            res.send(response);
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e
@@ -103,13 +110,14 @@ export class NamespacesHandler {
                     ));
             }
 
-            const item = await Namespaces.findById(apiData.id, {
+            const response = await Namespaces.findByPk(apiData.id, {
                 include: [Resources]
             });
-            if (item === null) {
+            if (response === null) {
                 throw new Error("An error occurred. Store not found");
             } else {
-                res.send(item);
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             }
         } catch (e) {
             this.logger.logError({
@@ -121,11 +129,12 @@ export class NamespacesHandler {
 
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
-            const item = await Namespaces.findById(id, {
+            const response = await Namespaces.findByPk(id, {
                 include: [Resources]
             });
-            if (item !== null) {
-                res.send(item);
+            if (response !== null) {
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
                 throw new Error("store not found");
             }
@@ -139,7 +148,7 @@ export class NamespacesHandler {
 
     public async buildRoute(req: Request, res: Response, id: string): Promise<any> {
         try {
-            const item = await Namespaces.findById(id);
+            const item = await Namespaces.findByPk(id);
 
             const f = 0;
             const arr: any[] = [];
@@ -165,9 +174,11 @@ export class NamespacesHandler {
             // get the tree here
             const tree = this.list_to_tree(container);
 
-            const generatedTable = this.getDescendants(tree[0], arr, f, item!.route);
+            const response = this.getDescendants(tree[0], arr, f, item!.route);
 
-            res.send(generatedTable);
+            res.send(response);
+
+            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({
                 message: e

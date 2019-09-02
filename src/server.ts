@@ -8,11 +8,17 @@ import {ManagerRouter} from "./routers/ManagerRouter";
 import {ProxyRouter} from "./routers/ProxyRouter";
 import {CronJob} from "./cronjob";
 import {JsonConsoleLogger} from "./logger/jsonConsoleLogger";
-// Routers
 
-// Create a new express application instance
+const cluster = require('cluster');
+
+// worker array that keeps relative PIDs
+let workers: any = [];
+
 const app = express();
 const logger = new JsonConsoleLogger();
+
+// todo: to read number of cores on system
+// let numCores = require('os').cpus().length;
 
 app.use(GlobalSecurityGroup);
 app.use(ParsersGroup);
@@ -33,6 +39,39 @@ ProxyList.getAllProxyMappings().then((proxies: ProxyProcessData[]) => {
     }
 ).catch(err => logger.logError(err));
 
-app.listen(config.port);
+if (cluster.isMaster) {
+
+    //could be used later to create parameterizable number of clusters
+    workers.push(cluster.fork());
+
+    // to receive messages from worker process
+    workers[0].on('message', function (message: string) {
+        logger.log(message);
+    });
+
+    // process is clustered on a core and process id is assigned
+    cluster.on('online', function (worker: any) {
+        logger.log('Worker ' + worker.process.pid + ' is listening');
+    });
+
+    // if any of the worker process dies then start a new one by simply forking another one
+    cluster.on('exit', function (worker: any, code: string, signal: string) {
+        logger.logError('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
+        logger.log('Starting a new worker');
+        cluster.fork();
+        workers.push(cluster.fork());
+        // to receive messages from worker process
+        workers[workers.length - 1].on('message', function (message: string) {
+            logger.log(message);
+        });
+    });
+
+    cluster.on('listening', (worker: any, address: any) => {
+        logger.log('A worker is now connected to port: ' + address.port);
+    });
+} else {
+    app.listen(config.port);
+}
+
 
 new CronJob().start();

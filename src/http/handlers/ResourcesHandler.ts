@@ -3,6 +3,10 @@ import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
 import {Resources} from "../../models/Resources";
 import {Methods} from "../../models/Methods";
 import {ResourcesProcessData} from "../../api/ResourcesProcessData";
+import validator from 'validator';
+import {InputValidationException} from "../../exceptions/InputValidationException";
+import {Namespaces} from "../../models/Namespaces";
+import {NotFoundException} from "../../exceptions/NotFoundException";
 
 export class ResourcesHandler {
     protected logger: JsonConsoleLogger;
@@ -32,34 +36,52 @@ export class ResourcesHandler {
 
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            this.logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
         }
     }
 
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             Resources.destroy({where: {id}});
             const response = {delete: true};
             res.send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
             const apiData = req.body;
+
+            if (!validator.isUUID(apiData.namespacesId)) {
+                throw new InputValidationException('Invalid namespace ID: ' + req.url);
+            }
+            if (!(await this.existNamespace(apiData.namespacesId))) {
+                throw new NotFoundException('Namespace not found: ' + req.url);
+            }
             if (!apiData.hasOwnProperty("id")) {
+                if (!(await this.uniqueResource(apiData.path, apiData.namespacesId))) {
+                    throw new InputValidationException('Resource already exists for current namespace');
+                }
                 const uuid = require('uuid-v4');
                 apiData.id = uuid();
             }
+
+            if ((validator.isEmpty(apiData.path)) || (validator.contains(apiData.path, '/'))) {
+                throw new InputValidationException('Invalid resource');
+            }
+
             await Resources.upsert(
                 new ResourcesProcessData(
                     apiData.namespacesId,
@@ -69,21 +91,28 @@ export class ResourcesHandler {
                 ));
             const response = await Resources.findByPk(apiData.id);
             if (response === null) {
-                throw new Error("An error occurred. Resource not found");
+                throw new NotFoundException("Resource not found");
             } else {
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             }
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             const item = await Resources.findByPk(id, {
                 include: [Resources, Methods]
             });
@@ -101,19 +130,26 @@ export class ResourcesHandler {
 
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
-                throw new Error("resource not found");
+                throw new NotFoundException("Resource not found");
             }
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
 
     public async getTreeByNamespace(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             const allResources: Resources[] = await Resources.findAll({
                 where: {namespacesId: id},
                 include: [Methods]
@@ -137,15 +173,20 @@ export class ResourcesHandler {
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
 
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
     public async getByIdMethods(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             const response = await Resources.findByPk(id, {
                 include: [Methods]
             });
@@ -155,13 +196,17 @@ export class ResourcesHandler {
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
-                throw new Error("resource not found");
+                throw new NotFoundException("Resource not found");
             }
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
@@ -184,5 +229,22 @@ export class ResourcesHandler {
             }
         }
         return roots;
+    }
+
+    private async uniqueResource(resource: string, namespacesId: string): Promise<boolean> {
+        const counter = await Resources.count(
+            {
+                where: {
+                    'path': resource,
+                    'namespacesId': namespacesId
+                }
+            }
+        );
+        return (counter === 0)
+    }
+
+    private async existNamespace(namespacesId: string): Promise<boolean> {
+        const counter = await Namespaces.count({where: {'id': namespacesId}});
+        return (counter !== 0)
     }
 }

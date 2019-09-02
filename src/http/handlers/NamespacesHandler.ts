@@ -6,6 +6,9 @@ import {Methods} from "../../models/Methods";
 import {ResourcesProcessData} from "../../api/ResourcesProcessData";
 import {MethodsProcessData} from "../../api/MethodsProcessData";
 import {InvalidRoutingStructureException} from "../../exceptions/InvalidRoutingStructureException";
+import validator from 'validator';
+import {InputValidationException} from "../../exceptions/InputValidationException";
+import {NotFoundException} from "../../exceptions/NotFoundException";
 
 
 export class NamespacesHandler {
@@ -18,14 +21,17 @@ export class NamespacesHandler {
 
     public async startAll(req: Request, res: Response): Promise<any> {
         try {
-            this.logger.logSecurity('♥ FailSafe reloading routes');
+            this.logger.logSecurity({
+                managing_route: req.url,
+                payload: req.body,
+                process: '♥ FailSafe reloading routes',
+                tag: 'manager'
+            });
             res.sendStatus(200);
             process.kill(process.pid);
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            this.logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
         }
     }
 
@@ -36,29 +42,35 @@ export class NamespacesHandler {
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
 
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            this.logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
         }
     }
 
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             Namespaces.destroy({where: {id}});
             const response = {delete: true};
             res.send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
     public async deleteRecursiveOne(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             const allResources: Resources[] = await Resources.findAll({
                 where: {namespacesId: id},
                 include: [Methods]
@@ -75,10 +87,12 @@ export class NamespacesHandler {
             res.send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
@@ -89,9 +103,23 @@ export class NamespacesHandler {
 
             const apiData = req.body;
             if (!isUpdate) {
+                if (!(await this.uniqueRoute(apiData.route))) {
+                    throw new InputValidationException('Namespace already exists');
+                }
                 const uuid = require('uuid-v4');
                 apiData.id = uuid();
             }
+
+            if (!validator.isUUID(apiData.id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
+            if ((validator.isEmpty(apiData.route)) || (validator.contains(apiData.route, '/'))) {
+                throw new InputValidationException('Invalid namespace');
+            }
+            apiData.route = validator.escape(apiData.route);
+            apiData.type = (apiData.type !== undefined) ? apiData.type : 'REST';
+            apiData.description = (apiData.description !== undefined) ? apiData.description : 'Sample description for ' + apiData.route;
+            apiData.active = (apiData.active !== undefined) ? apiData.active : true;
 
             await Namespaces.upsert(apiData);
 
@@ -106,7 +134,20 @@ export class NamespacesHandler {
 
                 await Methods.upsert(
                     new MethodsProcessData(
-                        resourceId
+                        resourceId,
+                        undefined,
+                        'GET',
+                        'none',
+                        undefined,
+                        undefined,
+                        undefined,
+                        'mock',
+                        'GET',
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        apiData.description
                     ));
             }
 
@@ -114,21 +155,28 @@ export class NamespacesHandler {
                 include: [Resources]
             });
             if (response === null) {
-                throw new Error("An error occurred. Store not found");
+                throw new NotFoundException("Namespace not found");
             } else {
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             }
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             const response = await Namespaces.findByPk(id, {
                 include: [Resources]
             });
@@ -136,18 +184,25 @@ export class NamespacesHandler {
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
-                throw new Error("store not found");
+                throw new NotFoundException("Namespace not found");
             }
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
     public async buildRoute(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             const item = await Namespaces.findByPk(id);
 
             const f = 0;
@@ -180,10 +235,12 @@ export class NamespacesHandler {
 
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.send({error: e.message});
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
 
     }
@@ -293,5 +350,10 @@ export class NamespacesHandler {
             f = accum!.length + node.childResources![i].methods!.length - 2;
         }
         return accum;
+    }
+
+    private async uniqueRoute(route: string): Promise<boolean> {
+        const counter = await Namespaces.count({where: {'route': route}});
+        return (counter === 0)
     }
 }

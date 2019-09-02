@@ -2,6 +2,8 @@ import {Request, Response} from 'express';
 import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
 import {ProxyProcessData} from "../../api/ProxyProcessData";
 import {Proxies} from "../../models/Proxies";
+import validator from "validator";
+import {InputValidationException} from "../../exceptions/InputValidationException";
 
 
 export class ProxyHandler {
@@ -45,15 +47,16 @@ export class ProxyHandler {
             res.send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            this.logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
         }
     }
 
     public async getAllByNamespace(req: Request, res: Response, id: string): Promise<any> {
         try {
+            if (!validator.isUUID(id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
             const process = await Proxies.findAll({
                 where: {namespacesId: id},
                 order: [
@@ -85,10 +88,12 @@ export class ProxyHandler {
             res.send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 
@@ -110,10 +115,8 @@ export class ProxyHandler {
             res.send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({
-                message: e
-            });
-            res.sendStatus(404);
+            res.status(500).send({error: e.message});
+            this.logger.logError({message: e, tag: "manager"});
         }
     }
 }

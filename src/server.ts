@@ -46,28 +46,28 @@ if (cluster.isMaster) {
 
     // to receive messages from worker process
     workers[0].on('message', function (message: string) {
-        logger.log(message);
+        logger.log({process:message, tag:'cluster'});
     });
 
     // process is clustered on a core and process id is assigned
     cluster.on('online', function (worker: any) {
-        logger.log('Worker ' + worker.process.pid + ' is listening');
+        logger.log({process:'Worker ' + worker.process.pid + ' is listening', tag:'cluster'});
     });
 
     // if any of the worker process dies then start a new one by simply forking another one
-    cluster.on('exit', function (worker: any, code: string, signal: string) {
-        logger.logError('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
-        logger.log('Starting a new worker');
+    cluster.on('exit', function (worker: any, code: string) {
+        logger.logError({process:'Worker ' + worker.process.pid + ' died with code: ' + code, tag:'cluster'});
+        logger.log({process:'Starting a new worker', tag:'cluster'});
         cluster.fork();
         workers.push(cluster.fork());
         // to receive messages from worker process
         workers[workers.length - 1].on('message', function (message: string) {
-            logger.log(message);
+            logger.log({process:message, tag:'cluster'});
         });
     });
 
     cluster.on('listening', (worker: any, address: any) => {
-        logger.log('A worker is now connected to port: ' + address.port);
+        logger.log({process:'A worker is now connected to port: ' + address.port, tag:'cluster'});
     });
 } else {
     app.listen(config.port);

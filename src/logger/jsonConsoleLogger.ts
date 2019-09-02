@@ -1,4 +1,5 @@
 import {LoggerInterface} from "./loggerInterface";
+
 const chalk = require('chalk');
 
 class JsonConsoleLogger implements LoggerInterface {
@@ -12,7 +13,7 @@ class JsonConsoleLogger implements LoggerInterface {
     logError(data: any): void {
         const error = chalk.keyword('orange');
         console.log(error(JSON.stringify(data, [
-            "message", "arguments", "type", "name", "stack", "destination", "body", "parent"
+            "message", "arguments", "type", "name", "stack", "destination", "body", "parent", "process", "tag"
         ])));
     }
 
@@ -20,7 +21,9 @@ class JsonConsoleLogger implements LoggerInterface {
         // can implement here security measures like send email or...
         // currently it acts as logger only
         const security = chalk.bold.red;
-        console.log(security(JSON.stringify(data, ["message", "arguments", "type", "name", "stack", "destination", "body"])));
+        console.log(security(JSON.stringify(data, [
+            "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"
+        ])));
     }
 }
 

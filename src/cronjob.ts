@@ -6,8 +6,11 @@ export class CronJob {
             cronTime: '00 30 00 * * *',
             onTick() {
                 const d = new Date();
-                console.log({message: d + " - Scheduled service restart ♥ FAILSAFE SHUTDOWN."});
-                process.exit(1);
+                this.logger.logSecurity({
+                    process: d + " - Scheduled service restart ♥ FAILSAFE SHUTDOWN.",
+                    tag: 'cluster'
+                });
+                process.kill(process.pid);
             },
             start: false,
             timeZone: 'CET'

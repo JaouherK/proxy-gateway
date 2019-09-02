@@ -6,9 +6,9 @@ import {Methods} from "../../models/Methods";
 import {ResourcesProcessData} from "../../api/ResourcesProcessData";
 import {MethodsProcessData} from "../../api/MethodsProcessData";
 import {InvalidRoutingStructureException} from "../../exceptions/InvalidRoutingStructureException";
-import validator from 'validator';
 import {InputValidationException} from "../../exceptions/InputValidationException";
 import {NotFoundException} from "../../exceptions/NotFoundException";
+import validator from 'validator';
 
 
 export class NamespacesHandler {

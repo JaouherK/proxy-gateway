@@ -3,9 +3,9 @@ import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
 import {Methods} from "../../models/Methods";
 import {Resources} from "../../models/Resources";
 import {MethodsProcessData, SupportedMethods} from "../../api/MethodsProcessData";
-import validator from "validator";
 import {InputValidationException} from "../../exceptions/InputValidationException";
 import {NotFoundException} from "../../exceptions/NotFoundException";
+import validator from "validator";
 
 
 export class MethodsHandler {

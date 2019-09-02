@@ -3,10 +3,10 @@ import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
 import {Resources} from "../../models/Resources";
 import {Methods} from "../../models/Methods";
 import {ResourcesProcessData} from "../../api/ResourcesProcessData";
-import validator from 'validator';
 import {InputValidationException} from "../../exceptions/InputValidationException";
 import {Namespaces} from "../../models/Namespaces";
 import {NotFoundException} from "../../exceptions/NotFoundException";
+import validator from 'validator';
 
 export class ResourcesHandler {
     protected logger: JsonConsoleLogger;

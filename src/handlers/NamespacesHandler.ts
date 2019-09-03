@@ -1,13 +1,13 @@
 import {Request, Response} from 'express';
-import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
-import {Namespaces} from "../../models/Namespaces";
-import {Resources} from "../../models/Resources";
-import {Methods} from "../../models/Methods";
-import {ResourcesProcessData} from "../../api/ResourcesProcessData";
-import {MethodsProcessData} from "../../api/MethodsProcessData";
-import {InvalidRoutingStructureException} from "../../exceptions/InvalidRoutingStructureException";
-import {InputValidationException} from "../../exceptions/InputValidationException";
-import {NotFoundException} from "../../exceptions/NotFoundException";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import {Namespaces} from "../models/Namespaces";
+import {Resources} from "../models/Resources";
+import {Methods} from "../models/Methods";
+import {ResourcesProcessData} from "../api/ResourcesProcessData";
+import {MethodsProcessData} from "../api/MethodsProcessData";
+import {InvalidRoutingStructureException} from "../exceptions/InvalidRoutingStructureException";
+import {InputValidationException} from "../exceptions/InputValidationException";
+import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
 
 

@@ -1,7 +1,7 @@
 import {Request, Response, Router} from 'express';
 import {ProxyProcessData} from "../api/ProxyProcessData";
 import proxy = require("express-http-proxy");
-import {JsonConsoleLogger} from "../logger/jsonConsoleLogger";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 
 export class ProxyRouter {
 

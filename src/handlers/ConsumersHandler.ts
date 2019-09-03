@@ -1,11 +1,11 @@
 import {Response, Request} from 'express';
-import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 
-import {Consumers} from "../../models/Consumers";
-import {Keys} from "../../models/Keys";
-import {InputValidationException} from "../../exceptions/InputValidationException";
-import {NotFoundException} from "../../exceptions/NotFoundException";
-import {ConsumersProcessData} from "../../api/ConsumersProcessData";
+import {Consumers} from "../models/Consumers";
+import {Keys} from "../models/Keys";
+import {InputValidationException} from "../exceptions/InputValidationException";
+import {NotFoundException} from "../exceptions/NotFoundException";
+import {ConsumersProcessData} from "../api/ConsumersProcessData";
 
 
 
@@ -59,7 +59,7 @@ export class ConsumersHandler {
             }
             apiData.email = (apiData.email !== undefined) ? apiData.email : '';
             apiData.customId = (apiData.customId !== undefined) ? apiData.customId : '';
-            apiData.active = (apiData.active !== undefined) ? apiData.active : true;
+            apiData.active = (apiData.active !== undefined) ? apiData.active : 1;
 
             await Consumers.upsert(
                 new ConsumersProcessData(

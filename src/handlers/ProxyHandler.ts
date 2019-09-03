@@ -1,8 +1,8 @@
 import {Request, Response} from 'express';
-import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
-import {ProxyProcessData} from "../../api/ProxyProcessData";
-import {Proxies} from "../../models/Proxies";
-import {InputValidationException} from "../../exceptions/InputValidationException";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import {ProxyProcessData} from "../api/ProxyProcessData";
+import {Proxies} from "../models/Proxies";
+import {InputValidationException} from "../exceptions/InputValidationException";
 import validator from "validator";
 
 
@@ -107,6 +107,7 @@ export class ProxyHandler {
                     namespacesId: apiData[0].namespacesId
                 },
             });
+
             apiData.forEach(element => {
                 Proxies.upsert(element);
             });

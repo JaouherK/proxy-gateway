@@ -1,11 +1,11 @@
 import {Response, Request} from 'express';
-import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
-import {Resources} from "../../models/Resources";
-import {Methods} from "../../models/Methods";
-import {ResourcesProcessData} from "../../api/ResourcesProcessData";
-import {InputValidationException} from "../../exceptions/InputValidationException";
-import {Namespaces} from "../../models/Namespaces";
-import {NotFoundException} from "../../exceptions/NotFoundException";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import {Resources} from "../models/Resources";
+import {Methods} from "../models/Methods";
+import {ResourcesProcessData} from "../api/ResourcesProcessData";
+import {InputValidationException} from "../exceptions/InputValidationException";
+import {Namespaces} from "../models/Namespaces";
+import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
 
 export class ResourcesHandler {

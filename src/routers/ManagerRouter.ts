@@ -1,10 +1,10 @@
 import {Response, Router, Request} from 'express';
-import {JsonConsoleLogger} from "../logger/jsonConsoleLogger";
-import {NamespacesHandler} from "../http/handlers/NamespacesHandler";
-import {ResourcesHandler} from "../http/handlers/ResourcesHandler";
-import {MethodsHandler} from "../http/handlers/MethodsHandler";
-import {ProxyHandler} from "../http/handlers/ProxyHandler";
-import {ConsumersHandler} from "../http/handlers/ConsumersHandler";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import {NamespacesHandler} from "../handlers/NamespacesHandler";
+import {ResourcesHandler} from "../handlers/ResourcesHandler";
+import {MethodsHandler} from "../handlers/MethodsHandler";
+import {ProxyHandler} from "../handlers/ProxyHandler";
+import {ConsumersHandler} from "../handlers/ConsumersHandler";
 
 
 const router: Router = Router();

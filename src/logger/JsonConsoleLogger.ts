@@ -1,4 +1,4 @@
-import {LoggerInterface} from "./loggerInterface";
+import {LoggerInterface} from "./LoggerInterface";
 
 const chalk = require('chalk');
 

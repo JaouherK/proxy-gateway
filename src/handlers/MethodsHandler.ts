@@ -1,10 +1,10 @@
 import {Response, Request} from 'express';
-import {JsonConsoleLogger} from "../../logger/jsonConsoleLogger";
-import {Methods} from "../../models/Methods";
-import {Resources} from "../../models/Resources";
-import {MethodsProcessData, SupportedMethods} from "../../api/MethodsProcessData";
-import {InputValidationException} from "../../exceptions/InputValidationException";
-import {NotFoundException} from "../../exceptions/NotFoundException";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import {Methods} from "../models/Methods";
+import {Resources} from "../models/Resources";
+import {MethodsProcessData, SupportedMethods} from "../api/MethodsProcessData";
+import {InputValidationException} from "../exceptions/InputValidationException";
+import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
 
 

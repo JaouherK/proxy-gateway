@@ -4,6 +4,8 @@ import {Resources} from "../models/Resources";
 import {Namespaces} from "../models/Namespaces";
 import {Methods} from "../models/Methods";
 import {sequelize} from "../sequelize";
+import {Consumers} from "../models/Consumers";
+import {Keys} from "../models/Keys";
 
 class ProxyList {
 
@@ -43,6 +45,8 @@ class ProxyList {
             );
             arr.push(aux);
         });
+        Consumers.sync();
+        Keys.sync();
         return arr;
     }
 }

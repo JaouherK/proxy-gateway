@@ -51,7 +51,7 @@ if (cluster.isMaster) {
 
     // process is clustered on a core and process id is assigned
     cluster.on('online', function (worker: any) {
-        logger.log({process:'Worker ' + worker.process.pid + ' is listening', tag:'cluster'});
+        logger.log({process:'Worker PID-' + worker.process.pid + ' is listening', tag:'cluster'});
     });
 
     // if any of the worker process dies then start a new one by simply forking another one
@@ -67,7 +67,7 @@ if (cluster.isMaster) {
     });
 
     cluster.on('listening', (worker: any, address: any) => {
-        logger.log({process:'A worker is now connected to port: ' + address.port, tag:'cluster'});
+        logger.log({process:'Worker PID-' + worker.process.pid + ' is now connected to port: ' + address.port, tag:'cluster'});
     });
 } else {
     app.listen(config.port);

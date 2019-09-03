@@ -4,6 +4,7 @@ import {NamespacesHandler} from "../http/handlers/NamespacesHandler";
 import {ResourcesHandler} from "../http/handlers/ResourcesHandler";
 import {MethodsHandler} from "../http/handlers/MethodsHandler";
 import {ProxyHandler} from "../http/handlers/ProxyHandler";
+import {ConsumersHandler} from "../http/handlers/ConsumersHandler";
 
 
 const router: Router = Router();
@@ -12,6 +13,7 @@ const namespaceHandler = new NamespacesHandler(logger);
 const resourceHandler = new ResourcesHandler(logger);
 const methodsHandler = new MethodsHandler(logger);
 const proxyHandler = new ProxyHandler(logger);
+const consumerHandler = new ConsumersHandler(logger);
 
 
 // restart the server in order to reconsider the new routes
@@ -132,6 +134,28 @@ router.get('/methods/:api', async (req: Request, res: Response) => {
     await methodsHandler.getById(req, res, api);
 });
 
+/***************************************************************************************/
+// get all consumers
+router.get('/consumers', async (req: Request, res: Response) => {
+    await consumerHandler.getAll(req, res);
+});
+
+// delete a consumer by id
+router.delete('/consumers/:api', async (req: Request, res: Response) => {
+    const api = req.params.api;
+    await consumerHandler.deleteOne(req, res, api);
+});
+
+// get a consumer by id
+router.get('/consumers/:api', async (req: Request, res: Response) => {
+    const api = req.params.api;
+    await consumerHandler.getById(req, res, api);
+});
+
+// create or update method
+router.post('/consumers', async (req: Request, res: Response) => {
+    await consumerHandler.addOrUpdate(req, res);
+});
 /***************************************************************************************/
 
 export const ManagerRouter: Router = router;

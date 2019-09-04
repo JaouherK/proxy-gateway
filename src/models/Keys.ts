@@ -6,6 +6,9 @@ export class Keys extends Model<Keys> {
 
     @PrimaryKey
     @Column
+    id!: string;
+
+    @Column
     keyHash!: string;
 
     @Column

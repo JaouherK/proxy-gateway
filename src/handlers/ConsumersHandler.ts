@@ -5,7 +5,7 @@ import {Consumers} from "../models/Consumers";
 import {Keys} from "../models/Keys";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
-import {ConsumersProcessData} from "../api/ConsumersProcessData";
+import validator from "validator";
 
 
 
@@ -51,31 +51,34 @@ export class ConsumersHandler {
     //
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
+
+            const payload = req.body;
             const apiData = req.body;
 
             if (!apiData.hasOwnProperty("id")) {
+                if (!(await this.uniqueUsername(apiData.username))) {
+                    throw new InputValidationException('Username already exists');
+                }
                 const uuid = require('uuid-v4');
                 apiData.id = uuid();
             }
+            if (!validator.isUUID(apiData.id)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
+            if (validator.isEmpty(apiData.username)) {
+                throw new InputValidationException('Invalid namespace');
+            }
             apiData.email = (apiData.email !== undefined) ? apiData.email : '';
             apiData.customId = (apiData.customId !== undefined) ? apiData.customId : '';
-            apiData.active = (apiData.active !== undefined) ? apiData.active : 1;
+            apiData.active = (apiData.active !== undefined) ? apiData.active : true;
 
-            await Consumers.upsert(
-                new ConsumersProcessData(
-                    apiData.username,
-                    apiData.id,
-                    apiData.email,
-                    apiData.customId,
-                    apiData.active
-                )
-            );
+            await Consumers.upsert(apiData);
             const response = await Consumers.findByPk(apiData.id);
             if (response === null) {
                 throw new NotFoundException("Consumers not found");
             } else {
                 res.send(response);
-                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+                this.logger.log({managing_route: req.url, payload, response, tag: "manager"});
             }
         } catch (e) {
             if (e instanceof InputValidationException) {
@@ -111,5 +114,10 @@ export class ConsumersHandler {
             }
             this.logger.logError({message: e, tag: "manager"});
         }
+    }
+
+    private async uniqueUsername(username: string): Promise<boolean> {
+        const counter = await Consumers.count({where: {'username': username}});
+        return (counter === 0)
     }
 }

@@ -5,6 +5,7 @@ import {ResourcesHandler} from "../handlers/ResourcesHandler";
 import {MethodsHandler} from "../handlers/MethodsHandler";
 import {ProxyHandler} from "../handlers/ProxyHandler";
 import {ConsumersHandler} from "../handlers/ConsumersHandler";
+import {KeysHandler} from "../handlers/KeysHandler";
 
 
 const router: Router = Router();
@@ -14,6 +15,7 @@ const resourceHandler = new ResourcesHandler(logger);
 const methodsHandler = new MethodsHandler(logger);
 const proxyHandler = new ProxyHandler(logger);
 const consumerHandler = new ConsumersHandler(logger);
+const keyHandler = new KeysHandler(logger);
 
 
 // restart the server in order to reconsider the new routes
@@ -152,9 +154,32 @@ router.get('/consumers/:api', async (req: Request, res: Response) => {
     await consumerHandler.getById(req, res, api);
 });
 
-// create or update method
+// create or update consumer
 router.post('/consumers', async (req: Request, res: Response) => {
     await consumerHandler.addOrUpdate(req, res);
+});
+/***************************************************************************************/
+
+// get all API keys
+router.get('/apiKeys', async (req: Request, res: Response) => {
+    await keyHandler.getAll(req, res);
+});
+
+// delete a  API key by id
+router.delete('/apiKeys/:api', async (req: Request, res: Response) => {
+    const api = req.params.api;
+    await keyHandler.deleteOne(req, res, api);
+});
+
+// get a  API key by id
+router.get('/apiKeys/:api', async (req: Request, res: Response) => {
+    const api = req.params.api;
+    await keyHandler.getById(req, res, api);
+});
+
+// create or update  API keys
+router.post('/apiKeys', async (req: Request, res: Response) => {
+    await keyHandler.addOrUpdate(req, res);
 });
 /***************************************************************************************/
 

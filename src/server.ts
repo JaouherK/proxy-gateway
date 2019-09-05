@@ -40,6 +40,18 @@ ProxyList.getAllProxyMappings().then((proxies: ProxyProcessData[]) => {
     }
 ).catch(err => logger.logError(err));
 
+
+app.use(function (req, res, next) {
+    logger.logError({process: '404 - Route ' + req.url + ' Not found.', tag: '404'});
+    return res.sendStatus(404);
+});
+
+// 500 - Any server error
+app.use(function (err: any, req: any, res: any, next: any) {
+    logger.logError({process: '505 - Route ' + req.url + ' caused Server error.', tag: '500'});
+    return res.status(500).send({error: err});
+});
+
 if (cluster.isMaster) {
 
     //could be used later to create parameterizable number of clusters

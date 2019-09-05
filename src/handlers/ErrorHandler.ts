@@ -6,12 +6,12 @@ export class ErrorHandler {
 
         process
             .on('unhandledRejection', (reason, p) => {
-                logger.logError(reason);
+                logger.logError({reason, "tag": "500"});
             })
             .on('uncaughtException', err => {
                 logger.logError(err);
                 setTimeout(function () {
-                    logger.logSecurity('♥ FAILSAFE SHUTDOWN. Ctrl-C to Force kill');
+                    logger.logSecurity({message: '♥ FAILSAFE SHUTDOWN. Ctrl-C to Force kill', "tag": "500"});
                     process.exit(1);
                 }, 5000);
             });

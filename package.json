@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node ./build/server.js",
-    "build": "node ./node_modules/typescript/bin/tsc",
-    "dev": "node ./node_modules/concurrently/src/main.js  \"./node_modules/nodemon/bin/nodemon.js --watch ./src --nolazy ./build/server.js\"",
-    "concurrently": "node ./node_modules/concurrently/bin/concurrently"
+    "start": "node -r ts-node/register ./src/server.ts",
+    "start-inspect": "node --inspect=5858 -r ts-node/register ./src/server.ts",
+    "start:watch": "nodemon",
+    "build": "tsc"
   },
   "dependencies": {
     "@types/bluebird": "3.5.18",
@@ -55,5 +55,18 @@
     "ts-node": "^3.3.0",
     "tsc-watch": "^1.0.8",
     "tslint": "^5.8.0"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm start",
+    "ext": "ts"
   }
 }

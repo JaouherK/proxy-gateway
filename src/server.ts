@@ -37,15 +37,12 @@ ProxyList.getAllProxyMappings().then((proxies: ProxyProcessData[]) => {
         proxies.forEach((prox: ProxyProcessData) => {
             app.use(prox.url, ProxyRouter.getRouter(prox, logger));
         });
+        app.use(function (req, res, next) {
+            logger.logError({process: '404 - Route ' + req.url + ' Not found.', tag: '404'});
+            return res.status(404).send({error: '404 - Route ' + req.url + ' Not found.'});
+        });
     }
 ).catch(err => logger.logError(err));
-
-
-// todo: handle 404 error: currently it is being treated before the proxies middleware :@
-// app.use(function (req, res, next) {
-//     logger.logError({process: '404 - Route ' + req.url + ' Not found.', tag: '404'});
-//     return res.sendStatus(404);
-// });
 
 // 500 - Any server error
 app.use(function (err: any, req: any, res: any, next: any) {

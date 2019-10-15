@@ -1,18 +1,33 @@
 {
-  "name": "app",
+  "name": "proxy-gateway",
+  "description": "Simple microservices API Gateway built with Typescript/ExpressJs with dynamic manageable routes",
+  "keywords": [
+    "gateway",
+    "managment",
+    "proxy",
+    "reverse gateway"
+  ],
+  "author": "Jaouher Kharrat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JaouherK/proxy-gateway/issues"
+  },
+  "homepage": "https://jaouherk.github.io/proxy-gateway/",
+  "main": "./src/server.ts",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "node -r ts-node/register ./src/server.ts",
     "start-inspect": "node --inspect=5858 -r ts-node/register ./src/server.ts",
     "start:watch": "nodemon",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "snyk test"
   },
   "dependencies": {
     "@types/bluebird": "3.5.18",
     "@types/busboy": "^0.2.3",
     "@types/cookie-parser": "^1.4.1",
-    "@types/cors": "^2.8.1",
+    "@types/cors": "^2.8.6",
     "@types/express": "^4.16.0",
     "@types/express-http-proxy": "^1.5.10",
     "@types/helmet": "0.0.42",
@@ -21,8 +36,9 @@
     "body-parser": "^1.18.2",
     "chalk": "^2.4.2",
     "concurrently": "^3.5.1",
+    "connect-ensure-login": "^0.1.1",
     "cookie-parser": "^1.4.3",
-    "cors": "^2.8.4",
+    "cors": "^2.8.5",
     "cron": "^1.5.0",
     "debug": "~2.6.9",
     "dotenv": "^6.0.0",
@@ -31,12 +47,16 @@
     "express-brute": "^1.0.1",
     "express-brute-sequelize": "0.0.8",
     "express-http-proxy": "^1.5.1",
+    "express-session": "^1.16.2",
     "express-slow-down": "^1.0.1",
     "helmet": "^3.14.0",
     "http-errors": "~1.6.2",
     "morgan": "^1.9.0",
     "mysql2": "^1.6.5",
     "nodemon": "^1.17.5",
+    "passport": "^0.4.0",
+    "passport-github2": "^0.1.11",
+    "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^4.37.5",
     "sequelize-typescript": "^0.6.6-beta.1",
@@ -51,10 +71,13 @@
     "@types/express": "^4.16.0",
     "@types/morgan": "^1.7.35",
     "@types/node": "^8.10.52",
+    "@types/passport": "^1.0.1",
+    "@types/passport-local": "^1.0.33",
     "concurrently": "^3.5.1",
     "ts-node": "^3.3.0",
     "tsc-watch": "^1.0.8",
-    "tslint": "^5.8.0"
+    "tslint": "^5.8.0",
+    "snyk": "^1.163.0"
   },
   "nodemonConfig": {
     "ignore": [

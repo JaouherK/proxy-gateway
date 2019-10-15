@@ -1,13 +1,9 @@
 import {Response, Request} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
-
 import {Consumers} from "../models/Consumers";
-import {Keys} from "../models/Keys";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
-
-
 
 export class ConsumersHandler {
     protected logger: JsonConsoleLogger;
@@ -16,10 +12,9 @@ export class ConsumersHandler {
         this.logger = logger;
     }
 
-
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
-            const response = await Consumers.findAll({include: [Keys]});
+            const response = await Consumers.findAll();
 
             res.send(response);
 
@@ -48,7 +43,7 @@ export class ConsumersHandler {
             this.logger.logError({message: e, tag: "manager"});
         }
     }
-    //
+
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
 
@@ -91,13 +86,13 @@ export class ConsumersHandler {
             this.logger.logError({message: e, tag: "manager"});
         }
     }
-    //
+
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
                 throw new InputValidationException('Invalid ID: ' + req.url);
             }
-            const response = await Consumers.findByPk(id, {include: [Keys]});
+            const response = await Consumers.findByPk(id);
             if (response !== null) {
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});

@@ -177,6 +177,12 @@ router.get('/apiKeys/:api', async (req: Request, res: Response) => {
     await keyHandler.getById(req, res, api);
 });
 
+// get a  API key by ConsumerId
+router.get('/apiKeys/consumer/:api', async (req: Request, res: Response) => {
+    const api = req.params.api;
+    await keyHandler.getByConsumerId(req, res, api);
+});
+
 // create or update  API keys
 router.post('/apiKeys', async (req: Request, res: Response) => {
     await keyHandler.addOrUpdate(req, res);

@@ -7,6 +7,8 @@ import {InputValidationException} from "../exceptions/InputValidationException";
 import {Namespaces} from "../models/Namespaces";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
+import {Sequelize} from "sequelize";
+const Op = Sequelize.Op;
 
 export class ResourcesHandler {
     protected logger: JsonConsoleLogger;
@@ -232,19 +234,14 @@ export class ResourcesHandler {
     }
 
     private async uniqueResource(path: string, namespacesId: string, resourcesId: string): Promise<boolean> {
-        await Resources.findAll({
-            where: {
-                'path': path,
-                'namespacesId': namespacesId,
-                'resourcesId': resourcesId
-            }, logging: console.log
-        });
         const counter = await Resources.count(
             {
                 where: {
-                    'path': path,
-                    'namespacesId': namespacesId,
-                    'resourcesId': resourcesId
+                    [Op.and]: [
+                        { 'path': path},
+                        {'namespacesId': namespacesId},
+                        {'resourcesId': resourcesId}
+                    ]
                 }
             }
         );

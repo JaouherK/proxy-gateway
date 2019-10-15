@@ -136,14 +136,77 @@ export class KeysHandler {
         }
     }
 
-    // //
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
                 throw new InputValidationException('Invalid ID: ' + req.url);
             }
-            const response = await Keys.findByPk(id);
-            if (response !== null) {
+            const value = await Keys.findByPk(id);
+            if (value !== null) {
+                const response = new KeysProcessData(
+                    value.id,
+                    value.keyHash,
+                    value.keyPrefix,
+                    value.name,
+                    value.throttling,
+                    value.throttlingRate,
+                    value.throttlingBurst,
+                    value.quota,
+                    value.quotaRate,
+                    value.quotaPeriod,
+                    value.activeFrom,
+                    value.activeTo,
+                    value.active,
+                    value.consumerId
+                );
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+            } else {
+                throw new NotFoundException("API Key not found");
+            }
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
+        }
+    }
+
+    public async getByConsumerId(req: Request, res: Response, consumerId: string): Promise<any> {
+        try {
+            if (!validator.isUUID(consumerId)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
+            const process = await Keys.findAll({
+                where: {
+                    consumerId: consumerId
+                }
+            });
+            if (process !== null) {
+                const response: KeysProcessData[] = [];
+                process.forEach((value: any) => {
+                    const aux = new KeysProcessData(
+                        value.id,
+                        value.keyHash,
+                        value.keyPrefix,
+                        value.name,
+                        value.throttling,
+                        value.throttlingRate,
+                        value.throttlingBurst,
+                        value.quota,
+                        value.quotaRate,
+                        value.quotaPeriod,
+                        value.activeFrom,
+                        value.activeTo,
+                        value.active,
+                        value.consumerId
+                    );
+                    response.push(aux);
+                });
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {

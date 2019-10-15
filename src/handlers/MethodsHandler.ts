@@ -6,7 +6,8 @@ import {MethodsProcessData, SupportedMethods} from "../api/MethodsProcessData";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
-
+import {Sequelize} from "sequelize";
+const Op = Sequelize.Op;
 
 export class MethodsHandler {
     protected logger: JsonConsoleLogger;
@@ -14,7 +15,6 @@ export class MethodsHandler {
     constructor(logger: JsonConsoleLogger) {
         this.logger = logger;
     }
-
 
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
@@ -163,8 +163,10 @@ export class MethodsHandler {
         const counter = await Methods.count(
             {
                 where: {
-                    'method': method,
-                    'resourcesId': resourcesId
+                    [Op.and]: [
+                        { 'method': method},
+                        {'resourcesId': resourcesId}
+                    ]
                 }
             }
         );

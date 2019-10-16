@@ -17,7 +17,12 @@ export class ResourcesHandler {
         this.logger = logger;
     }
 
-
+    /**
+     * get all resources
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Resources.findAll({include: [Methods]});
@@ -43,6 +48,13 @@ export class ResourcesHandler {
         }
     }
 
+    /**
+     * delete a resource
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -62,10 +74,16 @@ export class ResourcesHandler {
         }
     }
 
+    /**
+     * add/update resource
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
             const apiData = req.body;
-
+            apiData.path = validator.whitelist(apiData.path, 'a-zA-Z0-9-_');
             if (!validator.isUUID(apiData.namespacesId)) {
                 throw new InputValidationException('Invalid namespace ID: ' + req.url);
             }
@@ -80,7 +98,7 @@ export class ResourcesHandler {
                 apiData.id = uuid();
             }
 
-            if ((validator.isEmpty(apiData.path)) || (validator.contains(apiData.path, '/'))) {
+            if (validator.isEmpty(apiData.path)) {
                 throw new InputValidationException('Invalid resource');
             }
 

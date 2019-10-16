@@ -16,6 +16,12 @@ export class MethodsHandler {
         this.logger = logger;
     }
 
+    /**
+     * get all Methods
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Methods.findAll({include: [Resources]});
@@ -52,6 +58,13 @@ export class MethodsHandler {
         }
     }
 
+    /**
+     * delete a method
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -71,6 +84,12 @@ export class MethodsHandler {
         }
     }
 
+    /**
+     * add/update method
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
             const apiData = req.body;
@@ -130,6 +149,13 @@ export class MethodsHandler {
         }
     }
 
+    /**
+     * get method by ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -154,11 +180,24 @@ export class MethodsHandler {
         }
     }
 
+    /**
+     * Check if a resource exists
+     * @access  private
+     * @param  {string} resourceId
+     * @return {bool}
+     */
     private async existResource(resourceId: string): Promise<boolean> {
         const counter = await Resources.count({where: {'id': resourceId}});
         return (counter !== 0)
     }
 
+    /**
+     * Check if a method already exists for current resource id
+     * @access  private
+     * @param  {string} method
+     * @param  {string} resourcesId
+     * @return {bool}
+     */
     private async uniqueMethod(method: string, resourcesId: string): Promise<boolean> {
         const counter = await Methods.count(
             {

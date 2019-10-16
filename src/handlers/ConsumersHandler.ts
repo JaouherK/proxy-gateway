@@ -12,6 +12,12 @@ export class ConsumersHandler {
         this.logger = logger;
     }
 
+    /**
+     * get all consumers/owners/users
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const response = await Consumers.findAll();
@@ -25,6 +31,13 @@ export class ConsumersHandler {
         }
     }
 
+    /**
+     * delete a consumer/owner/user by id
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -44,6 +57,12 @@ export class ConsumersHandler {
         }
     }
 
+    /**
+     * add/update consumer/owner/user
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
 
@@ -87,6 +106,13 @@ export class ConsumersHandler {
         }
     }
 
+    /**
+     * get consumer/owner/user by ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -111,6 +137,12 @@ export class ConsumersHandler {
         }
     }
 
+    /**
+     * check uniqueness of a username
+     * @access  private
+     * @param  {string} username
+     * @return {boolean}
+     */
     private async uniqueUsername(username: string): Promise<boolean> {
         const counter = await Consumers.count({where: {'username': username}});
         return (counter === 0)

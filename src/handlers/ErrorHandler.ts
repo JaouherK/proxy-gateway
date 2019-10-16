@@ -1,6 +1,12 @@
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 
 export class ErrorHandler {
+
+    /**
+     * Manage unhandled:
+     *  - rejection => log
+     *  - exception => log + force reload by process exit
+     */
     public listenUncatchErrors() {
         const logger = new JsonConsoleLogger();
 

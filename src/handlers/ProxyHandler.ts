@@ -5,7 +5,6 @@ import {Proxies} from "../models/Proxies";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import validator from "validator";
 
-
 export class ProxyHandler {
     protected logger: JsonConsoleLogger;
 
@@ -13,6 +12,12 @@ export class ProxyHandler {
         this.logger = logger;
     }
 
+    /**
+     * get all proxies
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Proxies.findAll({
@@ -52,6 +57,13 @@ export class ProxyHandler {
         }
     }
 
+    /**
+     * get all proxies by namespace
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id
+     * @return {any}
+     */
     public async getAllByNamespace(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -97,6 +109,12 @@ export class ProxyHandler {
         }
     }
 
+    /**
+     * save proxies provided
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async saveRoutes(req: Request, res: Response): Promise<any> {
         try {
 

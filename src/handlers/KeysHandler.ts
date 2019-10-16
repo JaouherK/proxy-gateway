@@ -15,7 +15,12 @@ export class KeysHandler {
         this.logger = logger;
     }
 
-
+    /**
+     * get all Keys
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Keys.findAll();
@@ -48,7 +53,13 @@ export class KeysHandler {
         }
     }
 
-
+    /**
+     * delete an API Key
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -68,6 +79,12 @@ export class KeysHandler {
         }
     }
 
+    /**
+     * add/update an API Key
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
 
@@ -136,6 +153,13 @@ export class KeysHandler {
         }
     }
 
+    /**
+     * get API Key by ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -176,6 +200,13 @@ export class KeysHandler {
         }
     }
 
+    /**
+     * get all API Keys  by Consumer/owner ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} consumerId  uuid v4 format
+     * @return {any}
+     */
     public async getByConsumerId(req: Request, res: Response, consumerId: string): Promise<any> {
         try {
             if (!validator.isUUID(consumerId)) {
@@ -224,6 +255,12 @@ export class KeysHandler {
         }
     }
 
+    /**
+     * create an ID
+     * @access  private
+     * @param  {number} length
+     * @return {string}
+     */
     private makeid(length: number): string {
         let result = '';
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -234,11 +271,23 @@ export class KeysHandler {
         return result;
     }
 
+    /**
+     * check if a hash is unique
+     * @access  private
+     * @param  {string} hash
+     * @return {string}
+     */
     private async uniqueHash(hash: string): Promise<boolean> {
         const counter = await Keys.count({where: {'keyHash': hash}});
         return (counter === 0)
     }
 
+    /**
+     * check if a consumer exists
+     * @access  private
+     * @param  {string} consumerId
+     * @return {boolean}
+     */
     private async existConsumer(consumerId: string): Promise<boolean> {
         const counter = await Consumers.count({where: {'id': consumerId}});
         return (counter !== 0)

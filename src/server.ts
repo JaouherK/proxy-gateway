@@ -1,6 +1,5 @@
 import express from 'express';
 import {config} from "./config/config";
-// import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
 import {ParsersGroup} from "./middlewares/ParsersGroup";
 import {ProxyList} from "./api/ProxyList";
 import {ProxyProcessData} from "./api/ProxyProcessData";
@@ -9,8 +8,8 @@ import {ProxyRouter} from "./routers/ProxyRouter";
 import {CronJob} from "./cronjob";
 import {JsonConsoleLogger} from "./logger/JsonConsoleLogger";
 import {ErrorHandler} from "./handlers/ErrorHandler";
-import passport = require("passport");
-import {User} from "./models/User";
+import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
+import {passportGithub} from "./lib/policies/github-login/github";
 
 var cors = require('cors');
 
@@ -31,46 +30,13 @@ app.options('*', cors());
 // todo: to read number of cores on system
 // let numCores = require('os').cpus().length;
 
-let GitHubStrategy = require('passport-github2').Strategy;
 
-passport.use(new GitHubStrategy({
-        clientID: '378f9143a4dd707c4257',
-        clientSecret: '55effb11ada89d7daeb727ce8e8a482889600eef',
-        callbackURL: "http://localhost:3232/auth/github/callback"
-    },
-    function (accessToken: any, refreshToken: any, profile: any, done: any) {
-        // asynchronous verification, for effect...
-        process.nextTick(function () {
-                const uuid = require('uuid-v4');
-                const id = uuid();
-                User.upsert(
-                    {
-                        id: id,
-                        githubId: profile.id,
-                        username: profile.username,
-                        displayName: profile.displayName,
-                        photo: profile.photos[0].value
-                    }
-                );
-                return done(null, profile);
-            }
-        );
-    }
-));
-
-passport.serializeUser(function (user, cb) {
-    cb(null, user);
-});
-
-passport.deserializeUser(function (obj, cb) {
-    cb(null, obj);
-});
 
 app.use(require('cookie-parser')());
 app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: false}));
 
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(passportGithub.initialize());
+app.use(passportGithub.session());
 
 
 app.get('/account', ensureAuthenticated, function (req, res) {
@@ -82,7 +48,7 @@ app.get('/auth', (req, res) => {
 });
 
 app.get('/auth/github',
-    passport.authenticate('github', {scope: ['user:email']}),
+    passportGithub.authenticate('github', {scope: ['user:email']}),
     function (req, res) {
         console.log(req.query);
         // The request will be redirected to GitHub for authentication, so this
@@ -90,7 +56,7 @@ app.get('/auth/github',
     });
 
 app.get('/auth/github/callback',
-    passport.authenticate('github', {failureRedirect: '/auth'}),
+    passportGithub.authenticate('github', {failureRedirect: '/auth'}),
     function (req, res) {
         // Successful authentication, redirect home.
         res.redirect('/account');
@@ -110,12 +76,12 @@ function ensureAuthenticated(req: any, res: any, next: any) {
     // res.sendStatus(401);
 }
 
-// app.use(GlobalSecurityGroup);
+app.use(GlobalSecurityGroup);
 app.use(ParsersGroup);
 
 // Health Check endpoint
 app.get('/_healthcheck', function (req, res) {
-    res.send('healthy');
+    res.sendStatus(200);
 });
 
 // Administration

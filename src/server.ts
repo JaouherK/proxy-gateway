@@ -9,12 +9,9 @@ import {CronJob} from "./cronjob";
 import {JsonConsoleLogger} from "./logger/JsonConsoleLogger";
 import {ErrorHandler} from "./handlers/ErrorHandler";
 import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
-import {passportGithub} from "./lib/policies/github-login/github";
+import {AuthenticationRouter} from "./routers/AuthenticationRouter";
 
-var cors = require('cors');
-
-const session = require('express-session');
-
+const cors = require('cors');
 const cluster = require('cluster');
 
 // worker array that keeps relative PIDs
@@ -31,61 +28,17 @@ app.options('*', cors());
 // let numCores = require('os').cpus().length;
 
 
-
-app.use(require('cookie-parser')());
-app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: false}));
-
-app.use(passportGithub.initialize());
-app.use(passportGithub.session());
-
-
-app.get('/account', ensureAuthenticated, function (req, res) {
-    res.send({user: req.user});
-});
-
-app.get('/auth', (req, res) => {
-    res.send({marco: 'polo'});
-});
-
-app.get('/auth/github',
-    passportGithub.authenticate('github', {scope: ['user:email']}),
-    function (req, res) {
-        console.log(req.query);
-        // The request will be redirected to GitHub for authentication, so this
-        // function will not be called.
-    });
-
-app.get('/auth/github/callback',
-    passportGithub.authenticate('github', {failureRedirect: '/auth'}),
-    function (req, res) {
-        // Successful authentication, redirect home.
-        res.redirect('/account');
-    });
-
-app.get('/logout', function (req, res) {
-    req.logout();
-    res.sendStatus(200);
-});
-
-function ensureAuthenticated(req: any, res: any, next: any) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    logger.logSecurity({message: "Unauthenticated access", tag: "authentication"});
-    res.send({user: false})
-    // res.sendStatus(401);
-}
-
 app.use(GlobalSecurityGroup);
 app.use(ParsersGroup);
 
 // Health Check endpoint
-app.get('/_healthcheck', function (req, res) {
+app.get('/_health-check', function (req, res) {
     res.sendStatus(200);
 });
 
 // Administration
 app.use('/manager', ManagerRouter);
+app.use('/account', AuthenticationRouter);
 
 // advanced APIs proxy
 ProxyList.getAllProxyMappings().then((proxies: ProxyProcessData[]) => {
@@ -143,5 +96,5 @@ if (cluster.isMaster) {
     app.listen(config.port);
 }
 
-new ErrorHandler().listenUncatchErrors();
+new ErrorHandler().listenUncaughtErrors();
 new CronJob().start();

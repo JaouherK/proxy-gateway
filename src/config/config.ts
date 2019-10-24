@@ -1,4 +1,6 @@
 const defaultConfig = {
+
+    // general config
     port: 3232,
     jsonLimit: '20mb',
     isDevelopment: process.env.IS_DEVELOPMENT === 'true',
@@ -10,10 +12,9 @@ const defaultConfig = {
     username: getParamByDefault(process.env.DB_USER, "root"),
     password: getParamByDefault(process.env.DB_PASSWORD, ""),
 
-    //github credentials
-    githubClientID: getParamByDefault(process.env.GIT_CLIENT_ID, "378f9143a4dd707c4257"),
-    githubClientSecret: getParamByDefault(process.env.GIT_CLIENT_SECRET, "55effb11ada89d7daeb727ce8e8a482889600eef"),
-    githubCallbackURL: getParamByDefault(process.env.GIT_CLIENT_CALLBACK, ""),
+    //jwt secret
+    jwtSecret: "ch@ng3Me"
+
 };
 
 function getParamByDefault(param: any, defaultParam: any): any {

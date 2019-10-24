@@ -1,4 +1,4 @@
-import {PrimaryKey, Column, CreatedAt, Model, Table, UpdatedAt, IsUUID, Unique} from "sequelize-typescript";
+import {PrimaryKey, Column, CreatedAt, Model, Table, UpdatedAt, IsUUID, Unique, NotEmpty} from "sequelize-typescript";
 
 @Table
 export class User extends Model<User> {
@@ -8,18 +8,16 @@ export class User extends Model<User> {
     @Column
     id!: string;
 
-    @Column
-    displayName!: string;
-
     @Unique
     @Column
     username!: string;
 
     @Column
-    photo!: string;
+    password!: string;
 
+    @NotEmpty
     @Column
-    githubId!: string;
+    role!: string;
 
     @CreatedAt
     @Column

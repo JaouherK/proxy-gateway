@@ -1,8 +1,6 @@
-import {LoggerInterface} from "./LoggerInterface";
-
 const chalk = require('chalk');
 
-class JsonConsoleLogger implements LoggerInterface {
+class JsonConsoleLogger  {
 
     /**
      * Log normal message

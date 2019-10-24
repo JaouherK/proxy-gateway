@@ -7,7 +7,7 @@ export class ErrorHandler {
      *  - rejection => log
      *  - exception => log + force reload by process exit
      */
-    public listenUncatchErrors() {
+    public listenUncaughtErrors() {
         const logger = new JsonConsoleLogger();
 
         process

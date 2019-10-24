@@ -18,7 +18,12 @@ export class NamespacesHandler {
         this.logger = logger;
     }
 
-
+    /**
+     * kill the working process to reload configuration
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async startAll(req: Request, res: Response): Promise<any> {
         try {
             this.logger.logSecurity({
@@ -35,6 +40,12 @@ export class NamespacesHandler {
         }
     }
 
+    /**
+     * get all namespaces/stores
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const response = await Namespaces.findAll();
@@ -47,25 +58,13 @@ export class NamespacesHandler {
         }
     }
 
-    public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            Namespaces.destroy({where: {id}});
-            const response = {delete: true};
-            res.send(response);
-            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
-        }
-    }
-
+    /**
+     * delete a namespace and all its tree structure
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteRecursiveOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -76,13 +75,17 @@ export class NamespacesHandler {
                 include: [Methods]
             });
 
+            // destroy first the methods
             await allResources.forEach((resource: Resources) => {
                 Methods.destroy({where: {resourcesId: resource.id}});
             });
 
+            //destroy the resources
             await Resources.destroy({where: {namespacesId: id}});
 
+            // destroy finally the namespace
             Namespaces.destroy({where: {id}});
+
             const response = {delete: true};
             res.send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
@@ -96,12 +99,19 @@ export class NamespacesHandler {
         }
     }
 
+    /**
+     * add/update namespace
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
 
             const isUpdate = req.body.hasOwnProperty("id");
 
             const apiData = req.body;
+            apiData.route = validator.whitelist(apiData.route, 'a-zA-Z0-9-_');
             if (!isUpdate) {
                 if (!(await this.uniqueRoute(apiData.route))) {
                     throw new InputValidationException('Namespace already exists');
@@ -116,7 +126,7 @@ export class NamespacesHandler {
             if ((validator.isEmpty(apiData.route)) || (validator.contains(apiData.route, '/'))) {
                 throw new InputValidationException('Invalid namespace');
             }
-            apiData.route = validator.escape(apiData.route);
+
             apiData.type = (apiData.type !== undefined) ? apiData.type : 'REST';
             apiData.description = (apiData.description !== undefined) ? apiData.description : 'Sample description for ' + apiData.route;
             apiData.active = (apiData.active !== undefined) ? apiData.active : true;
@@ -141,13 +151,13 @@ export class NamespacesHandler {
                         undefined,
                         undefined,
                         undefined,
-                        'mock',
+                        'MOCK',
                         'GET',
                         undefined,
                         undefined,
                         undefined,
                         undefined,
-                        apiData.description
+                        '{"description": "' + apiData.description + '"}'
                     ));
             }
 
@@ -172,6 +182,13 @@ export class NamespacesHandler {
         }
     }
 
+    /**
+     * get namespace by ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -198,6 +215,13 @@ export class NamespacesHandler {
         }
     }
 
+    /**
+     * get the full tree of the namespace including resources and methods
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
     public async buildRoute(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -245,6 +269,12 @@ export class NamespacesHandler {
 
     }
 
+    /**
+     * build a tree from a an array
+     * @access  private
+     * @param  {ResourcesProcessData[]} list
+     * @return {any}
+     */
     private list_to_tree(list: ResourcesProcessData[]) {
         const map: any = {};
         let i;
@@ -267,6 +297,15 @@ export class NamespacesHandler {
         return roots;
     }
 
+    /**
+     * recursive function to generate the descendants in a table array combining full route
+     * @access  private
+     * @param  {ResourcesProcessData} node
+     * @param  {any[]} accum
+     * @param  {number} f
+     * @param  {string} namespace
+     * @return {any}
+     */
     private getDescendants(node: ResourcesProcessData, accum: any[], f: number, namespace: string) {
         let i;
         const orig = f;
@@ -352,6 +391,12 @@ export class NamespacesHandler {
         return accum;
     }
 
+    /**
+     * check if a route is unique to avoid duplicate
+     * @access  private
+     * @param  {string} route
+     * @return {boolean}
+     */
     private async uniqueRoute(route: string): Promise<boolean> {
         const counter = await Namespaces.count({where: {'route': route}});
         return (counter === 0)

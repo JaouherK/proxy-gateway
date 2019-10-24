@@ -1,6 +1,5 @@
 import express from 'express';
 import {config} from "./config/config";
-import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
 import {ParsersGroup} from "./middlewares/ParsersGroup";
 import {ProxyList} from "./api/ProxyList";
 import {ProxyProcessData} from "./api/ProxyProcessData";
@@ -9,7 +8,10 @@ import {ProxyRouter} from "./routers/ProxyRouter";
 import {CronJob} from "./cronjob";
 import {JsonConsoleLogger} from "./logger/JsonConsoleLogger";
 import {ErrorHandler} from "./handlers/ErrorHandler";
+import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
+import {AuthenticationRouter} from "./routers/AuthenticationRouter";
 
+const cors = require('cors');
 const cluster = require('cluster');
 
 // worker array that keeps relative PIDs
@@ -18,19 +20,25 @@ let workers: any = [];
 const app = express();
 const logger = new JsonConsoleLogger();
 
+
+app.use(cors());
+app.options('*', cors());
+
 // todo: to read number of cores on system
 // let numCores = require('os').cpus().length;
+
 
 app.use(GlobalSecurityGroup);
 app.use(ParsersGroup);
 
 // Health Check endpoint
-app.get('/_healthcheck', function (req, res) {
-    res.send('healthy');
+app.get('/_health-check', function (req, res) {
+    res.sendStatus(200);
 });
 
 // Administration
 app.use('/manager', ManagerRouter);
+app.use('/account', AuthenticationRouter);
 
 // advanced APIs proxy
 ProxyList.getAllProxyMappings().then((proxies: ProxyProcessData[]) => {
@@ -87,5 +95,5 @@ if (cluster.isMaster) {
     app.listen(config.port);
 }
 
-new ErrorHandler().listenUncatchErrors();
+new ErrorHandler().listenUncaughtErrors();
 new CronJob().start();

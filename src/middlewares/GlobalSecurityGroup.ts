@@ -26,7 +26,7 @@ const GlobalSecurityGroup = [
     helmet.frameguard({action: 'deny'}),
 
     // set header X-Permitted-Cross-Domain-Policies: none
-    helmet.permittedCrossDomainPolicies(),
+    // helmet.permittedCrossDomainPolicies(),
 
     // Lie and fake the powered by header to display php 5.6
     helmet.hidePoweredBy({setTo: 'PHP 5.6.0'}),

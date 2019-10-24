@@ -7,6 +7,8 @@ import {InputValidationException} from "../exceptions/InputValidationException";
 import {Namespaces} from "../models/Namespaces";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
+import {Sequelize} from "sequelize";
+const Op = Sequelize.Op;
 
 export class ResourcesHandler {
     protected logger: JsonConsoleLogger;
@@ -15,7 +17,12 @@ export class ResourcesHandler {
         this.logger = logger;
     }
 
-
+    /**
+     * get all resources
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Resources.findAll({include: [Methods]});
@@ -41,6 +48,13 @@ export class ResourcesHandler {
         }
     }
 
+    /**
+     * delete a resource
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -60,10 +74,16 @@ export class ResourcesHandler {
         }
     }
 
+    /**
+     * add/update resource
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
             const apiData = req.body;
-
+            apiData.path = validator.whitelist(apiData.path, 'a-zA-Z0-9-_');
             if (!validator.isUUID(apiData.namespacesId)) {
                 throw new InputValidationException('Invalid namespace ID: ' + req.url);
             }
@@ -78,7 +98,7 @@ export class ResourcesHandler {
                 apiData.id = uuid();
             }
 
-            if ((validator.isEmpty(apiData.path)) || (validator.contains(apiData.path, '/'))) {
+            if (validator.isEmpty(apiData.path)) {
                 throw new InputValidationException('Invalid resource');
             }
 
@@ -232,19 +252,14 @@ export class ResourcesHandler {
     }
 
     private async uniqueResource(path: string, namespacesId: string, resourcesId: string): Promise<boolean> {
-        await Resources.findAll({
-            where: {
-                'path': path,
-                'namespacesId': namespacesId,
-                'resourcesId': resourcesId
-            }, logging: console.log
-        });
         const counter = await Resources.count(
             {
                 where: {
-                    'path': path,
-                    'namespacesId': namespacesId,
-                    'resourcesId': resourcesId
+                    [Op.and]: [
+                        { 'path': path},
+                        {'namespacesId': namespacesId},
+                        {'resourcesId': resourcesId}
+                    ]
                 }
             }
         );

@@ -6,6 +6,7 @@ import {Methods} from "../models/Methods";
 import {sequelize} from "../sequelize";
 import {Consumers} from "../models/Consumers";
 import {Keys} from "../models/Keys";
+import {User} from "../models/User";
 
 class ProxyList {
 
@@ -47,6 +48,7 @@ class ProxyList {
         });
         Consumers.sync();
         Keys.sync();
+        User.sync();
         return arr;
     }
 }

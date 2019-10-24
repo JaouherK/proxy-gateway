@@ -15,7 +15,12 @@ export class KeysHandler {
         this.logger = logger;
     }
 
-
+    /**
+     * get all Keys
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Keys.findAll();
@@ -48,7 +53,13 @@ export class KeysHandler {
         }
     }
 
-
+    /**
+     * delete an API Key
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -68,6 +79,12 @@ export class KeysHandler {
         }
     }
 
+    /**
+     * add/update an API Key
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
 
@@ -136,14 +153,36 @@ export class KeysHandler {
         }
     }
 
-    // //
+    /**
+     * get API Key by ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
                 throw new InputValidationException('Invalid ID: ' + req.url);
             }
-            const response = await Keys.findByPk(id);
-            if (response !== null) {
+            const value = await Keys.findByPk(id);
+            if (value !== null) {
+                const response = new KeysProcessData(
+                    value.id,
+                    value.keyHash,
+                    value.keyPrefix,
+                    value.name,
+                    value.throttling,
+                    value.throttlingRate,
+                    value.throttlingBurst,
+                    value.quota,
+                    value.quotaRate,
+                    value.quotaPeriod,
+                    value.activeFrom,
+                    value.activeTo,
+                    value.active,
+                    value.consumerId
+                );
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             } else {
@@ -161,6 +200,67 @@ export class KeysHandler {
         }
     }
 
+    /**
+     * get all API Keys  by Consumer/owner ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} consumerId  uuid v4 format
+     * @return {any}
+     */
+    public async getByConsumerId(req: Request, res: Response, consumerId: string): Promise<any> {
+        try {
+            if (!validator.isUUID(consumerId)) {
+                throw new InputValidationException('Invalid ID: ' + req.url);
+            }
+            const process = await Keys.findAll({
+                where: {
+                    consumerId: consumerId
+                }
+            });
+            if (process !== null) {
+                const response: KeysProcessData[] = [];
+                process.forEach((value: any) => {
+                    const aux = new KeysProcessData(
+                        value.id,
+                        value.keyHash,
+                        value.keyPrefix,
+                        value.name,
+                        value.throttling,
+                        value.throttlingRate,
+                        value.throttlingBurst,
+                        value.quota,
+                        value.quotaRate,
+                        value.quotaPeriod,
+                        value.activeFrom,
+                        value.activeTo,
+                        value.active,
+                        value.consumerId
+                    );
+                    response.push(aux);
+                });
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+            } else {
+                throw new NotFoundException("API Key not found");
+            }
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
+        }
+    }
+
+    /**
+     * create an ID
+     * @access  private
+     * @param  {number} length
+     * @return {string}
+     */
     private makeid(length: number): string {
         let result = '';
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -171,11 +271,23 @@ export class KeysHandler {
         return result;
     }
 
+    /**
+     * check if a hash is unique
+     * @access  private
+     * @param  {string} hash
+     * @return {string}
+     */
     private async uniqueHash(hash: string): Promise<boolean> {
         const counter = await Keys.count({where: {'keyHash': hash}});
         return (counter === 0)
     }
 
+    /**
+     * check if a consumer exists
+     * @access  private
+     * @param  {string} consumerId
+     * @return {boolean}
+     */
     private async existConsumer(consumerId: string): Promise<boolean> {
         const counter = await Consumers.count({where: {'id': consumerId}});
         return (counter !== 0)

@@ -1,13 +1,9 @@
 import {Response, Request} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
-
 import {Consumers} from "../models/Consumers";
-import {Keys} from "../models/Keys";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
-
-
 
 export class ConsumersHandler {
     protected logger: JsonConsoleLogger;
@@ -16,10 +12,15 @@ export class ConsumersHandler {
         this.logger = logger;
     }
 
-
+    /**
+     * get all consumers/owners/users
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
-            const response = await Consumers.findAll({include: [Keys]});
+            const response = await Consumers.findAll();
 
             res.send(response);
 
@@ -30,6 +31,13 @@ export class ConsumersHandler {
         }
     }
 
+    /**
+     * delete a consumer/owner/user by id
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id uuid v4 format
+     * @return {any}
+     */
     public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -48,7 +56,13 @@ export class ConsumersHandler {
             this.logger.logError({message: e, tag: "manager"});
         }
     }
-    //
+
+    /**
+     * add/update consumer/owner/user
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
     public async addOrUpdate(req: Request, res: Response): Promise<any> {
         try {
 
@@ -91,13 +105,20 @@ export class ConsumersHandler {
             this.logger.logError({message: e, tag: "manager"});
         }
     }
-    //
+
+    /**
+     * get consumer/owner/user by ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
                 throw new InputValidationException('Invalid ID: ' + req.url);
             }
-            const response = await Consumers.findByPk(id, {include: [Keys]});
+            const response = await Consumers.findByPk(id);
             if (response !== null) {
                 res.send(response);
                 this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
@@ -116,6 +137,12 @@ export class ConsumersHandler {
         }
     }
 
+    /**
+     * check uniqueness of a username
+     * @access  private
+     * @param  {string} username
+     * @return {boolean}
+     */
     private async uniqueUsername(username: string): Promise<boolean> {
         const counter = await Consumers.count({where: {'username': username}});
         return (counter === 0)

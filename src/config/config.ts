@@ -13,8 +13,10 @@ const defaultConfig = {
     password: getParamByDefault(process.env.DB_PASSWORD, ""),
 
     //jwt secret
-    jwtSecret: "ch@ng3Me"
+    jwtSecret: getParamByDefault(process.env.JWT_SECRET, "ch@ng3Me"),
 
+    // demo mode params
+    demoMode: getParamByDefault(process.env.DEMO_MODE, true),
 };
 
 function getParamByDefault(param: any, defaultParam: any): any {

@@ -1,12 +1,12 @@
 import {Methods} from "../models/Methods";
 
-export class ResourcesProcessData {
+export class ResourcesDomain {
     id: string;
     namespacesId: string;
     resourcesId: string | null;
     path: string;
     methods?: Methods[];
-    childResources?: ResourcesProcessData[];
+    childResources?: ResourcesDomain[];
 
 
     constructor(
@@ -15,7 +15,7 @@ export class ResourcesProcessData {
         resourcesId?: string | null,
         path?: string,
         methods?: Methods[],
-        childResources?: ResourcesProcessData[]
+        childResources?: ResourcesDomain[]
     ) {
         this.namespacesId = namespacesId;
         const uuid = require('uuid-v4');

@@ -1,4 +1,4 @@
-export class KeysProcessData {
+export class KeysDomain {
     id: string;
     keyHash: string;
     keyPrefix: string;

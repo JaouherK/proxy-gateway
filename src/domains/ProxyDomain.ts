@@ -1,4 +1,4 @@
-export class ProxyProcessData {
+export class ProxyDomain {
     id: string;
     namespacesId: string;
     namespace: string;

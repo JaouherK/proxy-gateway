@@ -22,7 +22,7 @@ export enum SupportedContentHandling {
 }
 
 
-export class MethodsProcessData {
+export class MethodsDomains {
     id: string;
     resourcesId: string;
     method: string;

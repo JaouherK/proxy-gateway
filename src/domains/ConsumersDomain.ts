@@ -1,4 +1,4 @@
-export class ConsumersProcessData {
+export class ConsumersDomain {
     id: string;
     username: string;
     email: string;

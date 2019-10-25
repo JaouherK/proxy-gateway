@@ -1,8 +1,22 @@
 import {Proxies} from "../models/Proxies";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import validator from "validator";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import {ProxyDomain} from "../domains/ProxyDomain";
+import {Namespaces} from "../models/Namespaces";
+import {Resources} from "../models/Resources";
+import {Methods} from "../models/Methods";
+import {Consumers} from "../models/Consumers";
+import {Keys} from "../models/Keys";
+import {User} from "../models/User";
+import {sequelize} from "../sequelize";
 
 export class ProxyHandler {
+
+    constructor() {
+        sequelize.addModels([Proxies]);
+
+    }
 
     /**
      * get all proxies
@@ -84,5 +98,62 @@ export class ProxyHandler {
         }
 
         return exist;
+    }
+
+    public static async getAllProxyMappings(logger: JsonConsoleLogger): Promise<ProxyDomain[]> {
+        await Proxies.sync();
+        const arr: ProxyDomain[] = [];
+        try {
+            const process = await Proxies.findAll({
+                order: [
+                    ['order', 'DESC']
+                ],
+            });
+
+            process.forEach((value: any) => {
+                const aux = new ProxyDomain(
+                    value.id,
+                    value.namespacesId,
+                    value.namespace,
+                    value.url,
+                    value.endpointUrl,
+                    value.https,
+                    value.method,
+                    value.denyUpload,
+                    value.limit,
+                    value.authType,
+                    value.timeout,
+                    value.integrationType,
+                    value.mockResponseBody,
+                    value.mockResponseCode,
+                    value.mockResponseContent,
+                    value.order
+                );
+                arr.push(aux);
+            });
+            logger.log({message: 'proxies sync success ', tag: 'sync'});
+        } catch (e) {
+            logger.logError({message: e, tag: "sync"});
+        }
+
+        Namespaces.sync()
+            .then(() => logger.log({message: 'namespaces sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        Resources.sync()
+            .then(() => logger.log({message: 'resources sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        Methods.sync()
+            .then(() => logger.log({message: 'methods sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        Consumers.sync()
+            .then(() => logger.log({message: 'consumers sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        Keys.sync()
+            .then(() => logger.log({message: 'keys sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        User.sync()
+            .then(() => logger.log({message: 'users sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        return arr;
     }
 }

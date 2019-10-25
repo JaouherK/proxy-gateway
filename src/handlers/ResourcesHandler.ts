@@ -2,7 +2,7 @@ import {Response, Request} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Resources} from "../models/Resources";
 import {Methods} from "../models/Methods";
-import {ResourcesProcessData} from "../api/ResourcesProcessData";
+import {ResourcesDomain} from "../domains/ResourcesDomain";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {Namespaces} from "../models/Namespaces";
 import {NotFoundException} from "../exceptions/NotFoundException";
@@ -26,10 +26,10 @@ export class ResourcesHandler {
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Resources.findAll({include: [Methods]});
-            const response: ResourcesProcessData[] = [];
+            const response: ResourcesDomain[] = [];
 
             process.forEach((value: any) => {
-                const aux = new ResourcesProcessData(
+                const aux = new ResourcesDomain(
                     value.namespacesId,
                     value.id,
                     value.resourcesId,
@@ -103,7 +103,7 @@ export class ResourcesHandler {
             }
 
             await Resources.upsert(
-                new ResourcesProcessData(
+                new ResourcesDomain(
                     apiData.namespacesId,
                     apiData.id,
                     apiData.resourcesId,
@@ -138,7 +138,7 @@ export class ResourcesHandler {
             });
 
             if (item !== null) {
-                const response = new ResourcesProcessData(
+                const response = new ResourcesDomain(
                     item.namespacesId,
                     item.id,
                     item.resourcesId,
@@ -175,10 +175,10 @@ export class ResourcesHandler {
                 include: [Methods]
             });
 
-            const container: ResourcesProcessData[] = [];
+            const container: ResourcesDomain[] = [];
 
             allResources.forEach((element: Resources) => {
-                container.push(new ResourcesProcessData(
+                container.push(new ResourcesDomain(
                     element.namespacesId,
                     element.id,
                     element.resourcesId,
@@ -230,7 +230,7 @@ export class ResourcesHandler {
         }
     }
 
-    private list_to_tree(list: ResourcesProcessData[]) {
+    private list_to_tree(list: ResourcesDomain[]) {
         const map: any = {};
         let i;
         let node;

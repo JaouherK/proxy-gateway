@@ -1,8 +1,7 @@
 import express from 'express';
 import {config} from "./config/config";
 import {ParsersGroup} from "./middlewares/ParsersGroup";
-import {ProxyList} from "./api/ProxyList";
-import {ProxyProcessData} from "./api/ProxyProcessData";
+import {ProxyDomain} from "./domains/ProxyDomain";
 import {ManagerRouter} from "./routers/ManagerRouter";
 import {ProxyRouter} from "./routers/ProxyRouter";
 import {CronJob} from "./cronjob";
@@ -10,6 +9,7 @@ import {JsonConsoleLogger} from "./logger/JsonConsoleLogger";
 import {ErrorHandler} from "./handlers/ErrorHandler";
 import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
 import {AuthenticationRouter} from "./routers/AuthenticationRouter";
+import {ProxyHandler} from "./handlers/ProxyHandler";
 
 const cors = require('cors');
 const cluster = require('cluster');
@@ -27,13 +27,13 @@ app.options('*', cors());
 // todo: to read number of cores on system
 // let numCores = require('os').cpus().length;
 
-
 app.use(GlobalSecurityGroup);
 app.use(ParsersGroup);
 
 // Health Check endpoint
-app.get('/_health-check', function (req, res) {
+app.get('/_healthCheck', function (req, res) {
     res.sendStatus(200);
+    logger.log({process: 'Health check performed', tag: 'cluster'});
 });
 
 // Administration
@@ -41,9 +41,10 @@ app.use('/manager', ManagerRouter);
 app.use('/account', AuthenticationRouter);
 
 // advanced APIs proxy
-ProxyList.getAllProxyMappings().then((proxies: ProxyProcessData[]) => {
-        proxies.forEach((prox: ProxyProcessData) => {
-            app.use(prox.url, ProxyRouter.getRouter(prox, logger));
+ProxyHandler.getAllProxyMappings(logger).then((proxies: ProxyDomain[]) => {
+        proxies.forEach((proxy: ProxyDomain) => {
+            app.use(proxy.url, ProxyRouter.getRouter(proxy, logger));
+            logger.log({process: 'Route ' + proxy.url + ' deployed', tag: 'cluster'});
         });
         app.use(function (req, res, next) {
             logger.logError({process: '404 - Route ' + req.url + ' Not found.', tag: '404'});

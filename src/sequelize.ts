@@ -14,5 +14,6 @@ export const sequelize = new Sequelize({
     username: confUsername,
     password: confPassword,
     modelPaths: [__dirname + '/models'],
+    // set logging to true if you want sal logging
     logging: false
 });

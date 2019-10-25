@@ -1,12 +1,12 @@
-import {ResourcesProcessData} from "./ResourcesProcessData";
+import {ResourcesDomain} from "./ResourcesDomain";
 
-export class NamespacesProcessData {
+export class NamespacesDomain {
     id: string;
     route: string;
     type: string;
     description: string;
     active: boolean;
-    resources?: ResourcesProcessData[];
+    resources?: ResourcesDomain[];
 
     constructor(
         route: string,
@@ -14,7 +14,7 @@ export class NamespacesProcessData {
         type?: string,
         description?: string,
         active?: boolean,
-        resources?: ResourcesProcessData[]
+        resources?: ResourcesDomain[]
     ) {
         const uuid = require('uuid-v4');
         this.route = route;

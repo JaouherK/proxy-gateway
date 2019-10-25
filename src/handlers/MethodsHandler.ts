@@ -2,7 +2,7 @@ import {Response, Request} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Methods} from "../models/Methods";
 import {Resources} from "../models/Resources";
-import {MethodsProcessData, SupportedMethods} from "../api/MethodsProcessData";
+import {MethodsDomains, SupportedMethods} from "../domains/MethodsDomains";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
@@ -25,10 +25,10 @@ export class MethodsHandler {
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Methods.findAll({include: [Resources]});
-            const response: MethodsProcessData[] = [];
+            const response: MethodsDomains[] = [];
 
             process.forEach((value: any) => {
-                const aux = new MethodsProcessData(
+                const aux = new MethodsDomains(
                     value.resourcesId,
                     value.id,
                     value.method,
@@ -111,7 +111,7 @@ export class MethodsHandler {
                 apiData.id = uuid();
             }
             await Methods.upsert(
-                new MethodsProcessData(
+                new MethodsDomains(
                     apiData.resourcesId,
                     apiData.id,
                     apiData.method,

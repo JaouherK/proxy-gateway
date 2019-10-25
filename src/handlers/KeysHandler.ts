@@ -1,7 +1,7 @@
 import {Response, Request} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Keys} from "../models/Keys";
-import {KeysProcessData} from "../api/KeysProcessData";
+import {KeysDomain} from "../domains/KeysDomain";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
@@ -24,9 +24,9 @@ export class KeysHandler {
     public async getAll(req: Request, res: Response): Promise<any> {
         try {
             const process = await Keys.findAll();
-            const response: KeysProcessData[] = [];
+            const response: KeysDomain[] = [];
             process.forEach((value: any) => {
-                const aux = new KeysProcessData(
+                const aux = new KeysDomain(
                     value.id,
                     value.keyHash,
                     value.keyPrefix,
@@ -167,7 +167,7 @@ export class KeysHandler {
             }
             const value = await Keys.findByPk(id);
             if (value !== null) {
-                const response = new KeysProcessData(
+                const response = new KeysDomain(
                     value.id,
                     value.keyHash,
                     value.keyPrefix,
@@ -218,9 +218,9 @@ export class KeysHandler {
                 }
             });
             if (process !== null) {
-                const response: KeysProcessData[] = [];
+                const response: KeysDomain[] = [];
                 process.forEach((value: any) => {
-                    const aux = new KeysProcessData(
+                    const aux = new KeysDomain(
                         value.id,
                         value.keyHash,
                         value.keyPrefix,

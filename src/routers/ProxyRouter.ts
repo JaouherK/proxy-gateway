@@ -1,21 +1,22 @@
 import {Request, Response, Router} from 'express';
-import {ProxyProcessData} from "../api/ProxyProcessData";
+import {ProxyDomain} from "../domains/ProxyDomain";
 import proxy = require("express-http-proxy");
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {checkJwt} from "../middlewares/checkJwt";
 
 export class ProxyRouter {
 
-    static getRouter(prox: ProxyProcessData, logger: JsonConsoleLogger): Router {
+    static getRouter(prox: ProxyDomain, logger: JsonConsoleLogger): Router {
         const router: Router = Router();
         let logAuth = '';
-        //  authentication / authorization lvl0
+
         if (prox.authType === 'jwt') {
             logAuth = ' uses jwt auth';
             router.use(checkJwt);
         }
 
         if (prox.authType === 'apiKey') {
+            // todo: use API Key validation middleware
             logAuth = ' uses apiKey auth';
         }
 

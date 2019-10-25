@@ -3,8 +3,8 @@ import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Namespaces} from "../models/Namespaces";
 import {Resources} from "../models/Resources";
 import {Methods} from "../models/Methods";
-import {ResourcesProcessData} from "../api/ResourcesProcessData";
-import {MethodsProcessData} from "../api/MethodsProcessData";
+import {ResourcesDomain} from "../domains/ResourcesDomain";
+import {MethodsDomains} from "../domains/MethodsDomains";
 import {InvalidRoutingStructureException} from "../exceptions/InvalidRoutingStructureException";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
@@ -137,13 +137,13 @@ export class NamespacesHandler {
                 const uuid = require('uuid-v4');
                 const resourceId = uuid();
                 await Resources.upsert(
-                    new ResourcesProcessData(
+                    new ResourcesDomain(
                         apiData.id,
                         resourceId
                     ));
 
                 await Methods.upsert(
-                    new MethodsProcessData(
+                    new MethodsDomains(
                         resourceId,
                         undefined,
                         'GET',
@@ -237,10 +237,10 @@ export class NamespacesHandler {
                 include: [Methods]
             });
 
-            const container: ResourcesProcessData[] = [];
+            const container: ResourcesDomain[] = [];
 
             allResources.forEach((element: Resources) => {
-                container.push(new ResourcesProcessData(
+                container.push(new ResourcesDomain(
                     element.namespacesId,
                     element.id,
                     element.resourcesId,
@@ -272,10 +272,10 @@ export class NamespacesHandler {
     /**
      * build a tree from a an array
      * @access  private
-     * @param  {ResourcesProcessData[]} list
+     * @param  {ResourcesDomain[]} list
      * @return {any}
      */
-    private list_to_tree(list: ResourcesProcessData[]) {
+    private list_to_tree(list: ResourcesDomain[]) {
         const map: any = {};
         let i;
         let node;
@@ -300,13 +300,13 @@ export class NamespacesHandler {
     /**
      * recursive function to generate the descendants in a table array combining full route
      * @access  private
-     * @param  {ResourcesProcessData} node
+     * @param  {ResourcesDomain} node
      * @param  {any[]} accum
      * @param  {number} f
      * @param  {string} namespace
      * @return {any}
      */
-    private getDescendants(node: ResourcesProcessData, accum: any[], f: number, namespace: string) {
+    private getDescendants(node: ResourcesDomain, accum: any[], f: number, namespace: string) {
         let i;
         const orig = f;
         if (node.resourcesId === null) {

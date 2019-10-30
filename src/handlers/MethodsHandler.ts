@@ -1,4 +1,4 @@
-import {Response, Request} from 'express';
+import {Request, Response} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Methods} from "../models/Methods";
 import {Resources} from "../models/Resources";
@@ -7,6 +7,7 @@ import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
 import {Sequelize} from "sequelize";
+
 const Op = Sequelize.Op;
 
 export class MethodsHandler {
@@ -94,7 +95,6 @@ export class MethodsHandler {
         try {
             const apiData = req.body;
 
-            apiData.endpointUrl = validator.blacklist(apiData.endpointUrl, 'http.*:\\/\\/');
             if (!validator.isUUID(apiData.resourcesId)) {
                 throw new InputValidationException('Invalid resource ID: ' + req.url);
             }

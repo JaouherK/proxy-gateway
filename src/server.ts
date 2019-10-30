@@ -1,7 +1,6 @@
 import express from 'express';
 import {config} from "./config/config";
 import {ParsersGroup} from "./middlewares/ParsersGroup";
-import {ProxyDomain} from "./domains/ProxyDomain";
 import {ManagerRouter} from "./routers/ManagerRouter";
 import {ProxyRouter} from "./routers/ProxyRouter";
 import {CronJob} from "./cronjob";
@@ -10,6 +9,7 @@ import {ErrorHandler} from "./handlers/ErrorHandler";
 import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
 import {AuthenticationRouter} from "./routers/AuthenticationRouter";
 import {ProxyHandler} from "./handlers/ProxyHandler";
+import {ProxyDomain} from "./domains/ProxyDomain";
 
 const cors = require('cors');
 const cluster = require('cluster');
@@ -31,7 +31,7 @@ app.use(GlobalSecurityGroup);
 app.use(ParsersGroup);
 
 // Health Check endpoint
-app.get('/_healthCheck', function (req, res) {
+app.get('/_healthCheck', function (req: any, res: any) {
     res.sendStatus(200);
     logger.log({process: 'Health check performed', tag: 'cluster'});
 });
@@ -44,9 +44,9 @@ app.use('/account', AuthenticationRouter);
 ProxyHandler.getAllProxyMappings(logger).then((proxies: ProxyDomain[]) => {
         proxies.forEach((proxy: ProxyDomain) => {
             app.use(proxy.url, ProxyRouter.getRouter(proxy, logger));
-            logger.log({process: 'Route ' + proxy.url + ' deployed', tag: 'cluster'});
+            logger.log({process: 'Route ' + proxy.url + '(' + proxy.method + ') deployed', tag: 'cluster'});
         });
-        app.use(function (req, res, next) {
+    app.use(function (req: any, res: any, next: any) {
             logger.logError({process: '404 - Route ' + req.url + ' Not found.', tag: '404'});
             return res.status(404).send({error: '404 - Route ' + req.url + ' Not found.'});
         });

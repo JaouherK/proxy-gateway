@@ -1,8 +1,8 @@
 const defaultConfig = {
 
-    // general config
-    port: 3232,
     jsonLimit: '20mb',
+    // general config
+    port: getParamByDefault(process.env.PORT, "3232"),
     isDevelopment: process.env.IS_DEVELOPMENT === 'true',
 
     // for Sequelize to connect to db
@@ -10,7 +10,7 @@ const defaultConfig = {
     host: getParamByDefault(process.env.DB_HOST, "localhost"),
     database: getParamByDefault(process.env.DB_NAME, "gateway"),
     username: getParamByDefault(process.env.DB_USER, "root"),
-    password: getParamByDefault(process.env.DB_PASSWORD, ""),
+    password: getParamByDefault(process.env.DB_PASS, ""),
 
     //jwt secret
     jwtSecret: getParamByDefault(process.env.JWT_SECRET, "ch@ng3Me"),

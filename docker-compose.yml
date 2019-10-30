@@ -1,0 +1,45 @@
+version: '3.3'
+
+services:
+  ## gateway
+  proxy-gateway:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: proxy-gateway
+    container_name: proxy-gateway
+    restart: unless-stopped
+    environment:
+      IS_DEVELOPMENT: "true"
+      DB_TYPE: "mysql"
+      DB_HOST: "db"
+      DB_NAME: "gateway"
+      DB_PORT: "3306"
+      DB_USER: "root"
+      DB_PASS: "my-secret-pw"
+      PORT: "3000"
+      JWT_SECRET: 'ch@ng3Me'
+      DEMO_MODE: "true"
+    volumes:
+    - ./:/usr/src/gateway/
+    ports:
+    - "3000:3000"
+    networks:
+    - net
+  ## mysql
+  db:
+    image: mysql:8
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'my-secret-pw'
+      MYSQL_DATABASE: 'gateway'
+    volumes:
+    - ./01-init.sql:/usr/src/gateway/docker-entrypoint-initdb.d/
+    networks:
+    - net
+
+networks:
+  net:
+    external:
+      name: platform_net

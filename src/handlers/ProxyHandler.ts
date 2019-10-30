@@ -104,14 +104,14 @@ export class ProxyHandler {
         await Proxies.sync();
         const arr: ProxyDomain[] = [];
         try {
-            const process = await Proxies.findAll({
+            const process: any = await Proxies.findAll({
                 order: [
                     ['order', 'DESC']
                 ],
             });
 
             process.forEach((value: any) => {
-                const aux = new ProxyDomain(
+                const aux: ProxyDomain = new ProxyDomain(
                     value.id,
                     value.namespacesId,
                     value.namespace,

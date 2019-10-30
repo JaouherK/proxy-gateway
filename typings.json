@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "amqplib": "registry:dt/amqplib#0.5.0+20170118062225",
     "bluebird": "registry:dt/bluebird#3.5.0+20170323165310",
     "body-parser": "registry:dt/body-parser#1.16.0+20170321201455",
     "express": "registry:dt/express#4.0.0+20170118060322",

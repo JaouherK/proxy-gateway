@@ -1,8 +1,8 @@
 import {Request, Response, Router} from 'express';
 import {ProxyDomain} from "../domains/ProxyDomain";
-import proxy = require("express-http-proxy");
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {checkJwt} from "../middlewares/checkJwt";
+import proxy = require("express-http-proxy");
 
 export class ProxyRouter {
 
@@ -20,24 +20,40 @@ export class ProxyRouter {
             logAuth = ' uses apiKey auth';
         }
 
+        /*************Rate limiting ***********************/
+
+        const rateLimit = require("express-rate-limit");
+        const apiLimiter = rateLimit({
+            windowMs: 5000, // 1 second
+            max: 1
+        });
+
+
+        /******************** End *****************************/
+
         // manage if this is a mock
         if (prox.integrationType === 'MOCK') {
-            router.use((req: Request, res: Response) => {
-                logger.log({
-                    message: prox.url + ' (mocked route) requested' + logAuth,
-                    body: req.body,
-                    response: JSON.parse(prox.mockResponseBody),
-                    tag: prox.namespace
-                });
-                res.setHeader('Content-Type', prox.mockResponseContent);
-                res.status(prox.mockResponseCode).send(prox.mockResponseBody);
+            router.use((req: Request, res: Response, next) => {
+
+                if (req.method === prox.method) {
+                    logger.log({
+                        message: '(' + req.method + ')' + prox.url + ' (mocked route) requested' + logAuth,
+                        body: req.body,
+                        response: JSON.parse(prox.mockResponseBody),
+                        tag: prox.namespace
+                    });
+                    res.setHeader('Content-Type', prox.mockResponseContent);
+                    res.status(prox.mockResponseCode).send(prox.mockResponseBody);
+                } else {
+                    next();
+                }
             });
         }
 
         // manage if this is a a http request
         if (prox.integrationType === 'HTTP') {
 
-            router.use('*', proxy(prox.endpointUrl, {
+            router.use('*', apiLimiter, proxy(prox.endpointUrl, {
                 https: prox.https,
                 parseReqBody: prox.denyUpload,
                 limit: prox.limit,
@@ -63,7 +79,7 @@ export class ProxyRouter {
                 userResDecorator(proxyRes, proxyResData, userReq) {
                     const data = {data: proxyResData.toString('utf8')};
                     logger.log({
-                        message: userReq.originalUrl + ' requested' + logAuth + ' routed to ' + prox.endpointUrl,
+                        message: '(' + userReq.method + ')' + userReq.originalUrl + ' requested' + logAuth + ' routed to ' + prox.endpointUrl,
                         body: userReq.body,
                         response: data,
                         tag: prox.namespace

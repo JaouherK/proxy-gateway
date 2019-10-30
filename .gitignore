@@ -90,4 +90,4 @@ typings/
 .dynamodb/
 
 .idea/
-/package-lock.json
+mysql

@@ -25,7 +25,7 @@ class JsonConsoleLogger  {
         data.timestamp = timestamp;
         const error = chalk.keyword('orange');
         console.log(error(JSON.stringify(data, [
-            "timestamp", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"
+            "timestamp", "reason", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"
         ])));
     }
 
@@ -42,7 +42,7 @@ class JsonConsoleLogger  {
         // currently it acts as logger only
         const security = chalk.bold.red;
         console.log(security(JSON.stringify(data, [
-            "timestamp", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"
+            "timestamp", "reason", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"
         ])));
     }
 }

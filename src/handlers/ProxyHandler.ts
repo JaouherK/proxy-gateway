@@ -91,10 +91,20 @@ export class ProxyHandler {
         if (!validator.isUUID(id)) {
             throw new InputValidationException('Invalid ID');
         }
-        const response = await Proxies.findByPk(id);
-        let exist = {exist: false};
+        const response = await Proxies.findById(id);
+        let exist = {status: 'empty'};
         if (response !== null) {
-            exist = {exist: true}
+            const method = await Methods.findById(id);
+            exist = (method!.endpointUrl !== response.endpointUrl) ||
+            (method!.method !== response.method) ||
+            (method!.denyUpload !== response.denyUpload) ||
+            (method!.limit !== response.limit) ||
+            (method!.authType !== response.authType) ||
+            (method!.timeout !== response.timeout) ||
+            (method!.integrationType !== response.integrationType) ||
+            (method!.mockResponseBody !== response.mockResponseBody) ||
+            (+method!.mockResponseCode !== response.mockResponseCode) ||
+            (method!.mockResponseContent !== response.mockResponseContent) ? {status: 'pending'} : {status: 'valid'};
         }
 
         return exist;

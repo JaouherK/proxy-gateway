@@ -1,4 +1,4 @@
-import {Response, Request} from 'express';
+import {Request, Response} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Resources} from "../models/Resources";
 import {Methods} from "../models/Methods";
@@ -8,6 +8,7 @@ import {Namespaces} from "../models/Namespaces";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
 import {Sequelize} from "sequelize";
+
 const Op = Sequelize.Op;
 
 export class ResourcesHandler {
@@ -128,6 +129,13 @@ export class ResourcesHandler {
         }
     }
 
+    /**
+     * get resource by ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param id
+     * @return {any}
+     */
     public async getById(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -164,7 +172,13 @@ export class ResourcesHandler {
         }
     }
 
-
+    /**
+     * get tree of resources by namespace ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param id
+     * @return {any}
+     */
     public async getTreeByNamespace(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -202,6 +216,13 @@ export class ResourcesHandler {
         }
     }
 
+    /**
+     * get methods under a resource ID
+     * @param  {Request} req
+     * @param  {Response} res
+     * @param id
+     * @return {any}
+     */
     public async getByIdMethods(req: Request, res: Response, id: string): Promise<any> {
         try {
             if (!validator.isUUID(id)) {
@@ -210,7 +231,6 @@ export class ResourcesHandler {
             const response = await Resources.findByPk(id, {
                 include: [Methods]
             });
-
 
             if (response !== null) {
                 res.send(response);
@@ -256,18 +276,18 @@ export class ResourcesHandler {
             {
                 where: {
                     [Op.and]: [
-                        { 'path': path},
+                        {'path': path},
                         {'namespacesId': namespacesId},
                         {'resourcesId': resourcesId}
                     ]
                 }
             }
         );
-        return (counter === 0)
+        return (counter === 0);
     }
 
     private async existNamespace(namespacesId: string): Promise<boolean> {
         const counter = await Namespaces.count({where: {'id': namespacesId}});
-        return (counter !== 0)
+        return (counter !== 0);
     }
 }

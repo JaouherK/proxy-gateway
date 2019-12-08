@@ -1,4 +1,4 @@
-import {Response, Router, Request} from 'express';
+import {Request, Response, Router} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {NamespacesHandler} from "../handlers/NamespacesHandler";
 import {ResourcesHandler} from "../handlers/ResourcesHandler";
@@ -22,7 +22,6 @@ const proxyHandler = new ProxyHandler();
 const consumerHandler = new ConsumersHandler(logger);
 const keyHandler = new KeysHandler(logger);
 const userHandler = new UserHandler(logger);
-
 
 // restart the server in order to reconsider the new routes
 router.get('/restartPoints', async (req: Request, res: Response) => {
@@ -162,6 +161,14 @@ router.get('/namespaces/:api',
     async (req: Request, res: Response) => {
         const api = req.params.api;
         await namespaceHandler.getById(req, res, api);
+    });
+
+/***************************************************************************************/
+//test element
+router.post(
+    "/swagger",
+    async (req: Request, res: Response) => {
+        await namespaceHandler.generateFromSwagger(req, res);
     });
 
 /***************************************************************************************/

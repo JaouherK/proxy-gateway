@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Methods} from "../models/Methods";
 import {Resources} from "../models/Resources";
-import {MethodsDomains, SupportedMethods} from "../domains/MethodsDomains";
+import {MethodsDomains, SupportedContentTypes, SupportedMethods} from "../domains/MethodsDomains";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
@@ -98,18 +98,39 @@ export class MethodsHandler {
             if (!validator.isUUID(apiData.resourcesId)) {
                 throw new InputValidationException('Invalid resource ID: ' + req.url);
             }
+
             if (!(await this.existResource(apiData.resourcesId))) {
                 throw new NotFoundException('Resource not found: ' + req.url);
             }
 
+            apiData.method = (apiData.method !== undefined) ? apiData.method : SupportedMethods.get;
+
             if (!apiData.hasOwnProperty("id")) {
-                apiData.method = (apiData.method !== undefined) ? apiData.method : SupportedMethods.get;
                 if (!(await this.uniqueMethod(apiData.method, apiData.resourcesId))) {
                     throw new InputValidationException('Method already exists for current resource');
                 }
                 const uuid = require('uuid-v4');
                 apiData.id = uuid();
             }
+
+            // todo: have a check of duplicate when an existing created method so won't take place of another existing
+
+            if (apiData.integrationType === 'MOCK') {
+                if (!validator.isJSON(apiData.mockResponseBody)) {
+                    throw new InputValidationException('Invalid JSON mocked response');
+                }
+                apiData.mockResponseBody = (apiData.mockResponseBody !== '') ? apiData.mockResponseBody : '{}';
+                apiData.mockResponseCode = (apiData.mockResponseCode !== '') ? apiData.mockResponseCode : 200;
+                apiData.mockResponseContent = (apiData.mockResponseContent !== '') ?
+                    apiData.mockResponseContent : SupportedContentTypes.json;
+            }
+
+            if ((apiData.endpointUrl !== '') || (apiData.integrationType === 'HTTP')) {
+                if (!validator.isURL(apiData.endpointUrl)) {
+                    throw new InputValidationException('Invalid endpoint URL ' + req.url);
+                }
+            }
+
             await Methods.upsert(
                 new MethodsDomains(
                     apiData.resourcesId,
@@ -185,11 +206,11 @@ export class MethodsHandler {
      * Check if a resource exists
      * @access  private
      * @param  {string} resourceId
-     * @return {bool}
+     * @return {boolean}
      */
     private async existResource(resourceId: string): Promise<boolean> {
         const counter = await Resources.count({where: {'id': resourceId}});
-        return (counter !== 0)
+        return (counter !== 0);
     }
 
     /**
@@ -197,19 +218,19 @@ export class MethodsHandler {
      * @access  private
      * @param  {string} method
      * @param  {string} resourcesId
-     * @return {bool}
+     * @return {boolean}
      */
     private async uniqueMethod(method: string, resourcesId: string): Promise<boolean> {
         const counter = await Methods.count(
             {
                 where: {
                     [Op.and]: [
-                        { 'method': method},
+                        {'method': method},
                         {'resourcesId': resourcesId}
                     ]
                 }
             }
         );
-        return (counter === 0)
+        return (counter === 0);
     }
 }

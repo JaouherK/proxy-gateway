@@ -9,6 +9,7 @@ import {InvalidRoutingStructureException} from "../exceptions/InvalidRoutingStru
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
+import SwaggerParser from "swagger-parser";
 
 
 export class NamespacesHandler {
@@ -80,7 +81,7 @@ export class NamespacesHandler {
                 Methods.destroy({where: {resourcesId: resource.id}});
             });
 
-            //destroy the resources
+            // destroy the resources
             await Resources.destroy({where: {namespacesId: id}});
 
             // destroy finally the namespace
@@ -269,6 +270,134 @@ export class NamespacesHandler {
 
     }
 
+    public async generateFromSwagger(req: Request, res: Response): Promise<any> {
+        try {
+
+            //todo: unicity of route
+            const namespace = req.body.namespace;
+            const myAPI = req.body.swag;
+            let apiData: any = {};
+
+            if ((validator.isEmpty(namespace)) || (validator.contains(namespace, '/'))) {
+                throw new InputValidationException('Invalid namespace');
+            }
+
+
+            let api = await SwaggerParser.validate(myAPI);
+
+
+            apiData.route = namespace;
+            apiData.type = 'REST';
+            apiData.description = (api.info.title !== undefined) ? api.info.title : 'Sample description for ' + namespace;
+            apiData.getDescription = (api.info.description !== undefined) ? api.info.description : 'Sample description for ' + namespace;
+            apiData.active = true;
+            const uuid = require('uuid-v4');
+            apiData.id = uuid();
+
+            await Namespaces.upsert(apiData);
+            // const resourceId = uuid();
+            // await Resources.upsert(
+            //     {
+            //         namespacesId: apiData.id,
+            //
+            //         id : resourceId,
+            //         resourcesId : null,
+            //         path :  '',
+            //         methods : [],
+            //         childResources : []
+            //     },
+            // );
+            // await Methods.upsert(
+            //     new MethodsDomains(
+            //         resourceId,
+            //         undefined,
+            //         'GET',
+            //         'none',
+            //         undefined,
+            //         undefined,
+            //         undefined,
+            //         'MOCK',
+            //         'GET',
+            //         undefined,
+            //         undefined,
+            //         undefined,
+            //         undefined,
+            //         '{"description": "' + apiData.getDescription + '"}'
+            //     ));
+
+            const d: string = myAPI.basePath;
+            const t = d.split('/');
+
+            let childId = '';
+            let parentId = null;
+
+            await t.forEach(async (item) => {
+                console.log(item);
+                parentId = childId;
+                childId = uuid();
+                console.log({
+                    namespacesId: apiData.id,
+                    id: childId,
+                    resourcesId: parentId,
+                    path: validator.whitelist(item, 'a-zA-Z0-9-_'),
+                    methods: [],
+                    childResources: []
+                });
+
+
+                await Resources.upsert(
+                    {
+                        namespacesId: apiData.id,
+                        id: childId,
+                        resourcesId: parentId,
+                        path: validator.whitelist(item, 'a-zA-Z0-9-_'),
+                        methods: [],
+                        childResources: []
+                    },
+                );
+
+                // await Methods.upsert(
+                //     new MethodsDomains(
+                //         childId,
+                //         undefined,
+                //         'GET',
+                //         'none',
+                //         undefined,
+                //         undefined,
+                //         undefined,
+                //         'MOCK',
+                //         'GET',
+                //         undefined,
+                //         undefined,
+                //         undefined,
+                //         undefined,
+                //         '{}'
+                //     ));
+
+            });
+
+
+            const response = await Namespaces.findByPk(apiData.id, {
+                include: [Resources]
+            });
+            if (response === null) {
+                throw new NotFoundException("Namespace not initialised");
+            } else {
+                res.send(response);
+                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+            }
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
+        }
+    }
+
     /**
      * build a tree from a an array
      * @access  private
@@ -399,6 +528,6 @@ export class NamespacesHandler {
      */
     private async uniqueRoute(route: string): Promise<boolean> {
         const counter = await Namespaces.count({where: {'route': route}});
-        return (counter === 0)
+        return (counter === 0);
     }
 }

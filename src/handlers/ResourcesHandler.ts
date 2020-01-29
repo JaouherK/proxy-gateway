@@ -1,5 +1,3 @@
-import {Request, Response} from 'express';
-import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Resources} from "../models/Resources";
 import {Methods} from "../models/Methods";
 import {ResourcesDomain} from "../domains/ResourcesDomain";
@@ -12,244 +10,153 @@ import {Sequelize} from "sequelize";
 const Op = Sequelize.Op;
 
 export class ResourcesHandler {
-    protected logger: JsonConsoleLogger;
-
-    constructor(logger: JsonConsoleLogger) {
-        this.logger = logger;
-    }
 
     /**
      * get all resources
-     * @param  {Request} req
-     * @param  {Response} res
      * @return {any}
      */
-    public async getAll(req: Request, res: Response): Promise<any> {
-        try {
-            const process = await Resources.findAll({include: [Methods]});
-            const response: ResourcesDomain[] = [];
-
-            process.forEach((value: any) => {
-                const aux = new ResourcesDomain(
-                    value.namespacesId,
-                    value.id,
-                    value.resourcesId,
-                    value.path,
-                    value.methods,
-                    value.childResources
-                );
-                response.push(aux);
-            });
-            res.send(response);
-
-            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-        } catch (e) {
-            this.logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
-        }
+    public async getAll(): Promise<any> {
+        return Resources.findAll({include: [Methods]});
     }
 
     /**
      * delete a resource
-     * @param  {Request} req
-     * @param  {Response} res
      * @param  {string} id uuid v4 format
+     * @param url
      * @return {any}
      */
-    public async deleteOne(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            Resources.destroy({where: {id}});
-            const response = {delete: true};
-            res.send(response);
-            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
+    public async deleteOne(id: string, url: string): Promise<any> {
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
         }
+        return Resources.destroy({where: {id}});
     }
 
     /**
      * add/update resource
-     * @param  {Request} req
-     * @param  {Response} res
      * @return {any}
+     * @param apiData
+     * @param url
      */
-    public async addOrUpdate(req: Request, res: Response): Promise<any> {
-        try {
-            const apiData = req.body;
-            apiData.path = validator.whitelist(apiData.path, 'a-zA-Z0-9-_');
-            if (!validator.isUUID(apiData.namespacesId)) {
-                throw new InputValidationException('Invalid namespace ID: ' + req.url);
-            }
-            if (!(await this.existNamespace(apiData.namespacesId))) {
-                throw new NotFoundException('Namespace not found: ' + req.url);
-            }
-            if (!apiData.hasOwnProperty("id")) {
-                if (!(await this.uniqueResource(apiData.path, apiData.namespacesId, apiData.resourcesId))) {
-                    throw new InputValidationException('Resource already exists for current namespace');
-                }
-                const uuid = require('uuid-v4');
-                apiData.id = uuid();
-            }
-
-            if (validator.isEmpty(apiData.path)) {
-                throw new InputValidationException('Invalid resource');
-            }
-
-            await Resources.upsert(
-                new ResourcesDomain(
-                    apiData.namespacesId,
-                    apiData.id,
-                    apiData.resourcesId,
-                    apiData.path
-                ));
-            const response = await Resources.findByPk(apiData.id);
-            if (response === null) {
-                throw new NotFoundException("Resource not found");
-            } else {
-                res.send(response);
-                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-            }
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
+    public async addOrUpdate(apiData: any, url: string): Promise<any> {
+        apiData.path = validator.whitelist(apiData.path, 'a-zA-Z0-9-_');
+        if (!validator.isUUID(apiData.namespacesId)) {
+            throw new InputValidationException('Invalid namespace ID: ' + url);
         }
+        if (!(await this.existNamespace(apiData.namespacesId))) {
+            throw new NotFoundException('Namespace not found: ' + url);
+        }
+
+        if (!apiData.hasOwnProperty("id")) {
+            if (!(await this.uniqueResource(apiData.path, apiData.namespacesId, apiData.resourcesId))) {
+                throw new InputValidationException('Resource already exists for current namespace');
+            }
+            const uuid = require('uuid-v4');
+            apiData.id = uuid();
+        }
+
+        if (validator.isEmpty(apiData.path)) {
+            throw new InputValidationException('Invalid resource');
+        }
+
+        await Resources.upsert(
+            new ResourcesDomain(
+                apiData.namespacesId,
+                apiData.id,
+                apiData.resourcesId,
+                apiData.path
+            ));
+        const response = await Resources.findById(apiData.id);
+        if (response === null) {
+            throw new NotFoundException("An error occurred. Resource not found");
+        }
+
+        return response;
     }
 
     /**
      * get resource by ID
-     * @param  {Request} req
-     * @param  {Response} res
      * @param id
+     * @param url
      * @return {any}
      */
-    public async getById(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            const item = await Resources.findByPk(id, {
-                include: [Resources, Methods]
-            });
-
-            if (item !== null) {
-                const response = new ResourcesDomain(
-                    item.namespacesId,
-                    item.id,
-                    item.resourcesId,
-                    item.path,
-                    item.methods,
-                    item.childResources
-                );
-                res.send(response);
-
-                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-            } else {
-                throw new NotFoundException("Resource not found");
-            }
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
+    public async getById(id: string, url: string): Promise<any> {
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
         }
+        const item = await Resources.findById(id, {
+            include: [Resources, Methods]
+        });
+
+        if (item === null) {
+            throw new NotFoundException("resource not found");
+        }
+
+        return item;
     }
 
     /**
      * get tree of resources by namespace ID
-     * @param  {Request} req
-     * @param  {Response} res
      * @param id
+     * @param url
      * @return {any}
      */
-    public async getTreeByNamespace(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            const allResources: Resources[] = await Resources.findAll({
-                where: {namespacesId: id},
-                include: [Methods]
-            });
+    public async getTreeByNamespace(id: string, url: string): Promise<any> {
 
-            const container: ResourcesDomain[] = [];
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
+        }
+        const allResources: Resources[] = await Resources.findAll({
+            where: {namespacesId: id},
+            include: [Methods],
+        });
 
-            allResources.forEach((element: Resources) => {
-                container.push(new ResourcesDomain(
+        const container: ResourcesDomain[] = [];
+
+        allResources.forEach((element: Resources) => {
+            const restoredMethods = this.orderMethods(element.methods);
+            container.push(
+                new ResourcesDomain(
                     element.namespacesId,
                     element.id,
                     element.resourcesId,
                     element.path,
-                    element.methods,
+                    restoredMethods,
                     [],
-                ));
-            });
+                )
+            );
+        });
 
-            const response = this.list_to_tree(container);
-            res.send(response);
-            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
-        }
+        return this.list_to_tree(container);
     }
 
     /**
      * get methods under a resource ID
-     * @param  {Request} req
-     * @param  {Response} res
      * @param id
+     * @param url
      * @return {any}
      */
-    public async getByIdMethods(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            const response = await Resources.findByPk(id, {
-                include: [Methods]
-            });
+    public async getByIdMethods(id: string, url: string): Promise<any> {
 
-            if (response !== null) {
-                res.send(response);
-                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-            } else {
-                throw new NotFoundException("Resource not found");
-            }
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
         }
+
+        const response = await Resources.findById(id, {
+            include: [Methods]
+        });
+
+        if (response === null) {
+            throw new NotFoundException("resource not found");
+        }
+        return response;
     }
 
+    /**
+     * generate a tree from an array
+     * @return {any}
+     * @param list
+     */
     private list_to_tree(list: ResourcesDomain[]) {
         const map: any = {};
         let i;
@@ -271,6 +178,13 @@ export class ResourcesHandler {
         return roots;
     }
 
+    /**
+     * Check if a resource existence
+     * @return {any}
+     * @param path
+     * @param namespacesId
+     * @param resourcesId
+     */
     private async uniqueResource(path: string, namespacesId: string, resourcesId: string): Promise<boolean> {
         const counter = await Resources.count(
             {
@@ -286,8 +200,28 @@ export class ResourcesHandler {
         return (counter === 0);
     }
 
+    /**
+     * check if a namespace exists by ID
+     * @return {any}
+     * @param namespacesId
+     */
     private async existNamespace(namespacesId: string): Promise<boolean> {
         const counter = await Namespaces.count({where: {'id': namespacesId}});
         return (counter !== 0);
+    }
+
+    /**
+     * Order methods model by methods
+     * @return {any}
+     * @param methods
+     * @return Methods[]
+     */
+    private orderMethods(methods: Methods[]): Methods[] {
+        methods.sort((a, b) => {
+            const textA = a.method.toUpperCase();
+            const textB = b.method.toUpperCase();
+            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        });
+        return methods;
     }
 }

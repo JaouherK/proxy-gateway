@@ -1,4 +1,4 @@
-import {PrimaryKey, Column, CreatedAt, Model, Table, UpdatedAt, HasMany} from "sequelize-typescript";
+import {Column, HasMany, Model, PrimaryKey, Table} from "sequelize-typescript";
 import {Keys} from "./Keys";
 
 @Table
@@ -22,12 +22,4 @@ export class Consumers extends Model<Consumers> {
 
     @HasMany(() => Keys)
     keys!: Keys[];
-
-    @CreatedAt
-    @Column
-    createdAt!: Date;
-
-    @UpdatedAt
-    @Column
-    updatedAt!: Date;
 }

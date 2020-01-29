@@ -1,11 +1,14 @@
 import {Request, Response} from 'express';
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import helmet = require("helmet");
+
+const logger = new JsonConsoleLogger();
 
 /******************* Slow down Logic ****************************/
 /* more details https://www.npmjs.com/package/express-slow-down */
 const slowDown = require('express-slow-down');
-const onLimitReached = function (req: Request, res: Response, options: any) {
-    console.log('Quota requests/minute reached. Process slowed down: ' + req.ip);
+const onLimitReached = (req: Request, res: Response, options: any) => {
+    logger.log({message: 'Quota requests/minute reached. Process slowed down: ' + req.ip, tag: 'slow-down'});
 };
 
 const speedLimiter = slowDown({

@@ -123,12 +123,48 @@ export class AuthHandler {
         }
     }
 
+    /**
+     * Get profile or sending 401
+     * @param  {Request} req
+     * @param  {Response} res
+     * @return {any}
+     */
+    public async getProfile(req: Request, res: Response): Promise<any> {
+        try {
+            let user: any;
+            if (!config.demoMode) {
+                //Get ID from JWT
+                const id = res.locals.jwtPayload.userId;
+
+                //Get user from the database
+
+                user = await User.findByPk(id);
+
+                if (!user) {
+                    throw new AuthenticationException('No provided user');
+                }
+            } else {
+                user = {id: "4ac81092-c572-45f5-86c5-298e580cab04", username: "testUser", role: "ADMIN"};
+            }
+            res.send(user);
+
+            this.logger.log({managing_route: req.url, payload: req.body, response: token, tag: "manager"});
+        } catch (e) {
+            if (e instanceof AuthenticationException) {
+                res.status(401).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            this.logger.logError({message: e, tag: "manager"});
+        }
+    }
+
     private checkIfUnencryptedPasswordIsValid(unencryptedPassword: string, encryptedPassword: string) {
         return bcrypt.compareSync(unencryptedPassword, encryptedPassword);
     }
 
     private validate(password: string) {
-        if (password.length < 4) return false
+        if (password.length < 4) return false;
     }
 
     private hashPassword(password: string) {

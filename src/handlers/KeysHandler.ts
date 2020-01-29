@@ -1,4 +1,4 @@
-import {Response, Request} from 'express';
+import {Request, Response} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Keys} from "../models/Keys";
 import {KeysDomain} from "../domains/KeysDomain";
@@ -103,7 +103,6 @@ export class KeysHandler {
                 throw new InputValidationException('Invalid namespace');
             }
             if (!(await this.existConsumer(apiData.consumerId))) {
-                console.log('WTF');
                 throw new NotFoundException('Invalid consumer ID: ' + req.url);
             }
             if ((apiData.keyPrefix === undefined) || (validator.isEmpty(apiData.keyPrefix))) {

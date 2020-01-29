@@ -10,9 +10,8 @@ import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
 import {AuthenticationRouter} from "./routers/AuthenticationRouter";
 import {ProxyHandler} from "./handlers/ProxyHandler";
 import {ProxyDomain} from "./domains/ProxyDomain";
-
-const cors = require('cors');
-const cluster = require('cluster');
+import cors from "cors";
+import cluster from 'cluster';
 
 // worker array that keeps relative PIDs
 let workers: any = [];
@@ -20,9 +19,15 @@ let workers: any = [];
 const app = express();
 const logger = new JsonConsoleLogger();
 
-
-app.use(cors());
-app.options('*', cors());
+//options for cors midddleware
+const options: cors.CorsOptions = {
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"],
+    credentials: true,
+    methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
+    preflightContinue: false
+};
+app.use(cors(options));
+app.options('*', cors(options));
 
 // todo: to read number of cores on system
 // let numCores = require('os').cpus().length;

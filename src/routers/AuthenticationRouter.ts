@@ -1,4 +1,4 @@
-import {Response, Router, Request} from 'express';
+import {Request, Response, Router} from 'express';
 import {AuthHandler} from "../handlers/AuthHandler";
 import {checkJwt} from "../middlewares/checkJwt";
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
@@ -17,6 +17,13 @@ router.post("/change-password",
     [checkJwt],
     async (req: Request, res: Response) => {
         await authHandler.changePassword(req, res);
+    });
+
+//Change my password
+router.get("/profile",
+    [checkJwt],
+    async (req: Request, res: Response) => {
+        await authHandler.getProfile(req, res);
     });
 
 export const AuthenticationRouter: Router = router;

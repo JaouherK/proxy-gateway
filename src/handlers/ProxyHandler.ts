@@ -1,4 +1,3 @@
-import {Proxies} from "../models/Proxies";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import validator from "validator";
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
@@ -9,14 +8,9 @@ import {Methods} from "../models/Methods";
 import {Consumers} from "../models/Consumers";
 import {Keys} from "../models/Keys";
 import {User} from "../models/User";
-import {sequelize} from "../sequelize";
+import {Proxies} from "../models/Proxies";
 
 export class ProxyHandler {
-
-    constructor() {
-        sequelize.addModels([Proxies]);
-
-    }
 
     /**
      * get all proxies
@@ -106,12 +100,13 @@ export class ProxyHandler {
             (+method!.mockResponseCode !== response.mockResponseCode) ||
             (method!.mockResponseContent !== response.mockResponseContent) ? {status: 'pending'} : {status: 'valid'};
         }
-
         return exist;
     }
 
     public static async getAllProxyMappings(logger: JsonConsoleLogger): Promise<ProxyDomain[]> {
-        await Proxies.sync();
+        Proxies.sync()
+            .then(() => logger.log({message: 'namespaces sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
         const arr: ProxyDomain[] = [];
         try {
             const process: any = await Proxies.findAll({

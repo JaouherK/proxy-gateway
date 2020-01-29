@@ -15,25 +15,34 @@ import {UserHandler} from "../handlers/UserHandler";
 
 const router: Router = Router();
 const logger = new JsonConsoleLogger();
-const namespaceHandler = new NamespacesHandler(logger);
-const resourceHandler = new ResourcesHandler(logger);
-const methodsHandler = new MethodsHandler(logger);
+const namespaceHandler = new NamespacesHandler();
+const resourceHandler = new ResourcesHandler();
+const methodsHandler = new MethodsHandler();
 const proxyHandler = new ProxyHandler();
-const consumerHandler = new ConsumersHandler(logger);
+const consumerHandler = new ConsumersHandler();
 const keyHandler = new KeysHandler(logger);
 const userHandler = new UserHandler(logger);
 
 // restart the server in order to reconsider the new routes
 router.get('/restartPoints', async (req: Request, res: Response) => {
-    await namespaceHandler.startAll(req, res);
+    try {
+        logger.logSecurity({
+            managing_route: req.url,
+            payload: req.body,
+            process: '♥ FailSafe reloading routes',
+            tag: 'manager'
+        });
+        res.sendStatus(200);
+        process.kill(process.pid);
+    } catch (e) {
+        logger.logError({
+            message: e
+        });
+        res.sendStatus(404);
+    }
 });
 
-// generate routes from the tree view
-router.get('/proxies/build/:namespace', async (req: Request, res: Response) => {
-    const api = req.params.namespace;
-    await namespaceHandler.buildRoute(req, res, api);
-});
-/***************************************************************************************/
+/******************************PROXIES ************************************/
 
 // save routes to proxy data
 router.post('/proxies/save',
@@ -123,163 +132,383 @@ router.get('/proxies/exist/:proxyId',
         }
     });
 
-/***************************************************************************************/
-
+/***************************** NAMESPACE ****************************************/
 // get all namespaces
 router.get('/namespaces',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        await namespaceHandler.getAll(req, res);
+        try {
+            const response = await namespaceHandler.getAll();
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
+        }
     });
 
-// create or update namespaces
+// create or update namespace
 router.post('/namespaces',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        await namespaceHandler.addOrUpdate(req, res);
+        try {
+            const response = await namespaceHandler.addOrUpdate(req.body, req.url);
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
 
 // delete an namespace by id
 router.delete('/namespaces/:api',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await namespaceHandler.deleteRecursiveOne(req, res, api);
+        try {
+            const api = req.params.api;
+            await namespaceHandler.deleteOne(api, req.url);
+            const response = {delete: true};
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
+        }
     });
 
-// delete a namespace by id (recursive)
+// delete recursive namespace
 router.delete('/namespaces/recursive/:api',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await namespaceHandler.deleteRecursiveOne(req, res, api);
+        try {
+            const api = req.params.api;
+            await namespaceHandler.deleteRecursiveOne(api, req.url);
+            const response = {delete: true};
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
 
-// get an namespace by id
+// get a namespace by id
 router.get('/namespaces/:api',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await namespaceHandler.getById(req, res, api);
+        try {
+            const api = req.params.api;
+            const response = await namespaceHandler.getById(api, req.url);
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
+
+// build route tree
+router.get('/proxies/build/:namespace',
+    [checkJwt, checkRole(["ADMIN"])],
+    async (req: Request, res: Response) => {
+        try {
+            const api = req.params.namespace;
+            const response = await namespaceHandler.buildRoute(api, req.url);
+            res.send(response);
+
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
+        }
+    });
+
 
 /***************************************************************************************/
 //test element
 router.post(
     "/swagger",
+    [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
         await namespaceHandler.generateFromSwagger(req, res);
     });
 
-/***************************************************************************************/
-
+/******************************** RESOURCES *************************************/
 // get all dynamic resources
 router.get('/resources',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        await resourceHandler.getAll(req, res);
+        try {
+            const response = await resourceHandler.getAll();
+            res.send(response);
+
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
+        }
+    });
+
+// delete a resource by id
+router.delete('/resources/:api',
+    [checkJwt, checkRole(["ADMIN"])],
+    async (req: Request, res: Response) => {
+        try {
+            const api = req.params.api;
+            await resourceHandler.deleteOne(api, req.url);
+            const response = {delete: true};
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
 
 // create or update resource
 router.post('/resources',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        await resourceHandler.addOrUpdate(req, res);
+        try {
+            const response = await resourceHandler.addOrUpdate(req.body, req.url);
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
 
-// delete an resource by id
-router.delete('/resources/:api',
-    [checkJwt, checkRole(["ADMIN"])],
-    async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await resourceHandler.deleteOne(req, res, api);
-    });
-
-// get an resource by id
+// get resource by id
 router.get('/resources/:api',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await resourceHandler.getById(req, res, api);
+        try {
+            const api = req.params.api;
+            const response = await resourceHandler.getById(api, req.url);
+            res.send(response);
+
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
+        }
     });
 
-// get a resource by id
-router.get('/resources/:api/methods',
-    [checkJwt, checkRole(["ADMIN"])],
-    async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await resourceHandler.getByIdMethods(req, res, api);
-    });
-
-// get a resource by Namespace id
+// get an end point by Namespace id
 router.get('/resources/namespace/:api',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
+        try {
+            const api = req.params.api;
+            const response = await resourceHandler.getTreeByNamespace(api, req.url);
+
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
+    });
+
+// get an end point by id
+router.get('/resources/:api/methods',
+    [checkJwt, checkRole(["ADMIN"])],
+    async (req: Request, res: Response) => {
+        try {
+            const api = req.params.api;
+            const response = await resourceHandler.getByIdMethods(api, req.url);
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
+    });
+
+/********************************* METHODS ************************************/
+// get all dynamic methods
+router.get('/methods', async (req: Request, res: Response) => {
+    try {
+        const response = await methodsHandler.getAll();
+        res.send(response);
+
+        logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+    } catch (e) {
+        logger.logError({message: e, tag: "manager"});
+        res.status(500).send({error: e.message});
+    }
+});
+
+// delete a method
+router.delete('/methods/:api', async (req: Request, res: Response) => {
+    try {
         const api = req.params.api;
-        await resourceHandler.getTreeByNamespace(req, res, api);
-    });
+        await methodsHandler.deleteOne(api, req.url);
+        const response = {delete: true};
+        res.send(response);
+        logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+    } catch (e) {
+        if (e instanceof InputValidationException) {
+            res.status(409).send({error: e.message});
+        } else {
+            res.status(500).send({error: e.message});
+        }
+        logger.logError({message: e, tag: "manager"});
+    }
+});
 
-/*************************************************************************************/
+// create or update endpoints
+router.post('/methods', async (req: Request, res: Response) => {
+    try {
+        const response = await methodsHandler.addOrUpdate(req.body, req.url);
 
-// get all methods
-router.get('/methods',
-    [checkJwt, checkRole(["ADMIN"])],
-    async (req: Request, res: Response) => {
-        await methodsHandler.getAll(req, res);
-    });
+        res.send(response);
+        logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+    } catch (e) {
+        if (e instanceof InputValidationException) {
+            res.status(409).send({error: e.message});
+        } else if (e instanceof NotFoundException) {
+            res.status(404).send({error: e.message});
+        } else {
+            res.status(500).send({error: e.message});
+        }
+        logger.logError({message: e, tag: "manager"});
+    }
+});
 
-// create or update method
-router.post('/methods',
-    [checkJwt, checkRole(["ADMIN"])],
-    async (req: Request, res: Response) => {
-        await methodsHandler.addOrUpdate(req, res);
-    });
-
-// delete a method by id
-router.delete('/methods/:api',
-    [checkJwt, checkRole(["ADMIN"])],
-    async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await methodsHandler.deleteOne(req, res, api);
-    });
 
 // get a method by id
-router.get('/methods/:api',
-    [checkJwt, checkRole(["ADMIN"])],
-    async (req: Request, res: Response) => {
+router.get('/methods/:api', async (req: Request, res: Response) => {
+    try {
         const api = req.params.api;
-        await methodsHandler.getById(req, res, api);
-    });
+        const response = await methodsHandler.getById(api, req.url);
+
+        res.send(response);
+        logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+    } catch (e) {
+        if (e instanceof InputValidationException) {
+            res.status(409).send({error: e.message});
+        } else if (e instanceof NotFoundException) {
+            res.status(404).send({error: e.message});
+        } else {
+            res.status(500).send({error: e.message});
+        }
+        logger.logError({message: e, tag: "manager"});
+    }
+});
 
 /***************************************************************************************/
 // get all consumers
 router.get('/consumers',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        await consumerHandler.getAll(req, res);
+        try {
+            const response = await consumerHandler.getAll();
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            logger.logError({message: e, tag: "manager"});
+            res.status(500).send({error: e.message});
+        }
     });
 
 // delete a consumer by id
 router.delete('/consumers/:api',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await consumerHandler.deleteOne(req, res, api);
+        try {
+            const api = req.params.api;
+            const response = await consumerHandler.deleteOne(req.url, api);
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
 
 // get a consumer by id
 router.get('/consumers/:api',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        const api = req.params.api;
-        await consumerHandler.getById(req, res, api);
+        try {
+            const api = req.params.api;
+            const response = await consumerHandler.getById(req.url, api);
+            res.send(response);
+            logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
 
 // create or update consumer
 router.post('/consumers',
     [checkJwt, checkRole(["ADMIN"])],
     async (req: Request, res: Response) => {
-        await consumerHandler.addOrUpdate(req, res);
+        try {
+            const payload = req.body;
+            const response = await consumerHandler.addOrUpdate(req);
+            res.send(response);
+            logger.log({managing_route: req.url, payload, response, tag: "manager"});
+        } catch (e) {
+            if (e instanceof InputValidationException) {
+                res.status(409).send({error: e.message});
+            } else if (e instanceof NotFoundException) {
+                res.status(404).send({error: e.message});
+            } else {
+                res.status(500).send({error: e.message});
+            }
+            logger.logError({message: e, tag: "manager"});
+        }
     });
 /***************************************************************************************/
 

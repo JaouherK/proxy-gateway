@@ -23,7 +23,9 @@
     "build": "tsc",
     "test-dependencies": "snyk test",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -70,7 +72,8 @@
     "swagger-parser": "^8.0.3",
     "typescript": "^3.6.4",
     "uuid": "^3.2.1",
-    "uuid-v4": "^0.1"
+    "uuid-v4": "^0.1",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "@types/ejs": "^2.6.0",
@@ -82,7 +85,6 @@
     "concurrently": "^3.5.1",
     "jest": "^24.9.0",
     "sequelize-mock": "^0.10.2",
-    "snyk": "^1.235.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^3.3.0",
     "tsc-watch": "^1.0.8",
@@ -100,5 +102,6 @@
     ],
     "exec": "npm start",
     "ext": "ts"
-  }
+  },
+  "snyk": true
 }

@@ -34,6 +34,9 @@ export class ProxyRouter {
         // manage if this is a mock
         if (prox.integrationType === 'MOCK') {
             router.use((req: Request, res: Response, next) => {
+                if (prox.method.toLowerCase() !== req.method.toLowerCase()) {
+                    return next();
+                }
 
                 if (req.method === prox.method) {
                     logger.log({

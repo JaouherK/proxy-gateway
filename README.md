@@ -1,5 +1,6 @@
-#### A Microservices API Gateway Built Using Typescript
+A Microservices API Gateway Built Using Typescript
 ----
+![v0.2.0](https://img.shields.io/badge/version-0.2.0-green)
 
 Proxy Gateway is an API gateway that hovers over microservices or serverless architecture. It is completely dissociated from the stack used for the other services. It secures and exposes your services with a complete control over all its functionality and behaviour.
 

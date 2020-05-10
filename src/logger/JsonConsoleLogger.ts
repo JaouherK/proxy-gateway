@@ -1,6 +1,34 @@
+import {config} from "../config/config";
+
 const chalk = require('chalk');
 
-class JsonConsoleLogger  {
+class JsonConsoleLogger {
+
+    private static prepareMessage(data: any, type: string) {
+        const t: any = {};
+        if (config.timestamp) {
+            t.timestamp = new Date().getTime();
+        }
+        let v = Object.assign(t, data);
+        if (!config.colorsOutput) {
+            return JSON.stringify(v);
+        } else {
+            let color;
+            switch (type) {
+                case "success":
+                    color = chalk.bold.green;
+                    break;
+                case "warn":
+                    color = chalk.keyword('orange');
+                    break;
+                case "error":
+                    color = chalk.bold.red;
+                    break;
+            }
+
+            return color(JSON.stringify(v));
+        }
+    }
 
     /**
      * Log normal message
@@ -8,11 +36,7 @@ class JsonConsoleLogger  {
      * @return {void}
      */
     log(data: any): void {
-        const t:any = {};
-        t.timestamp = new Date().getTime();
-        let v = Object.assign(t, data);
-        const success = chalk.bold.green;
-        console.log(success(JSON.stringify(v)));
+        console.log(JsonConsoleLogger.prepareMessage(data, "success"));
     }
 
     /**
@@ -21,12 +45,7 @@ class JsonConsoleLogger  {
      * @return {void}
      */
     logError(data: any): void {
-        const timestamp = new Date().getTime();
-        data.timestamp = timestamp;
-        const error = chalk.keyword('orange');
-        console.log(error(JSON.stringify(data, [
-            "timestamp", "reason", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"
-        ])));
+        console.log(JsonConsoleLogger.prepareMessage(data, "warn"));
     }
 
     /**
@@ -36,14 +55,8 @@ class JsonConsoleLogger  {
      * @return {void}
      */
     logSecurity(data: any): void {
-        const timestamp = new Date().getTime();
-        data.timestamp = timestamp;
-        // can implement here security measures like send email or...
-        // currently it acts as logger only
-        const security = chalk.bold.red;
-        console.log(security(JSON.stringify(data, [
-            "timestamp", "reason", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"
-        ])));
+        // could add here a notification middleware
+        console.log(JsonConsoleLogger.prepareMessage(data, "error"));
     }
 }
 

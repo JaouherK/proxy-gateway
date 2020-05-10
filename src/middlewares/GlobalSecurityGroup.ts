@@ -1,6 +1,9 @@
 import {Request, Response} from 'express';
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import cors from 'cors';
+import {corsConfig} from "../config/corsConfig";
 import helmet = require("helmet");
+
 
 const logger = new JsonConsoleLogger();
 
@@ -43,6 +46,8 @@ const GlobalSecurityGroup = [
             scriptSrc: ["'self'"]
         }
     }),
+
+    cors(corsConfig),
 
     /* Slow down middleware after window of time */
     speedLimiter,

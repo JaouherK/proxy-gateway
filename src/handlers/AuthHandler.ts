@@ -7,6 +7,7 @@ import {AuthenticationException} from "../exceptions/AuthenticationException";
 import * as bcrypt from "bcryptjs";
 import {token} from "morgan";
 import {InputValidationException} from "../exceptions/InputValidationException";
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
 export class AuthHandler {
 
@@ -54,9 +55,9 @@ export class AuthHandler {
             this.logger.log({managing_route: req.url, payload: req.body, response: token, tag: "manager"});
         } catch (e) {
             if (e instanceof AuthenticationException) {
-                res.status(401).send({error: e.message});
+                res.status(HttpResponseCodes.Unauthorized).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
@@ -108,23 +109,23 @@ export class AuthHandler {
             };
             await User.upsert(updatedUser);
 
-            res.status(200).send({message: "Password updated"});
+            res.status(HttpResponseCodes.Ok).send({message: "Password updated"});
 
             this.logger.log({managing_route: req.url, payload: req.body, response: token, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(400).send({error: e.message});
+                res.status(HttpResponseCodes.BadRequest).send({error: e.message});
             } else if (e instanceof AuthenticationException) {
-                res.status(401).send({error: e.message});
+                res.status(HttpResponseCodes.Unauthorized).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
     }
 
     /**
-     * Get profile or sending 401
+     * Get profile or sending HttpResponseCodes.Unauthorized
      * @param  {Request} req
      * @param  {Response} res
      * @return {any}
@@ -151,9 +152,9 @@ export class AuthHandler {
             this.logger.log({managing_route: req.url, payload: req.body, response: token, tag: "manager"});
         } catch (e) {
             if (e instanceof AuthenticationException) {
-                res.status(401).send({error: e.message});
+                res.status(HttpResponseCodes.Unauthorized).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }

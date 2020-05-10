@@ -14,7 +14,7 @@
   },
   "homepage": "https://jaouherk.github.io/proxy-gateway/",
   "main": "./src/server.ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "start": "node -r ts-node/register ./src/server.ts  --colors",

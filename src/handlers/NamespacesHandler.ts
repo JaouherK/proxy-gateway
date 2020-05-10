@@ -115,7 +115,7 @@ export class NamespacesHandler {
                 ));
         }
 
-        const response = await Namespaces.findById(apiData.id, {
+        const response = await Namespaces.findByPk(apiData.id, {
             include: [Resources]
         });
         if (response === null) {
@@ -135,7 +135,7 @@ export class NamespacesHandler {
         if (!validator.isUUID(id)) {
             throw new InputValidationException('Invalid ID: ' + url);
         }
-        const response = await Namespaces.findById(id, {
+        const response = await Namespaces.findByPk(id, {
             include: [Resources]
         });
         if (response === null) {
@@ -155,7 +155,7 @@ export class NamespacesHandler {
         if (!validator.isUUID(id)) {
             throw new InputValidationException('Invalid ID: ' + url);
         }
-        const item = await Namespaces.findById(id);
+        const item = await Namespaces.findByPk(id);
 
         const f = 0;
         const arr: any[] = [];

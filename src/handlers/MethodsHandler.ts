@@ -4,9 +4,8 @@ import {MethodsDomains, SupportedContentTypes, SupportedMethods} from "../domain
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
-import {Sequelize} from "sequelize";
 
-const Op = Sequelize.Op;
+const {Op} = require("sequelize");
 
 export class MethodsHandler {
 
@@ -96,7 +95,7 @@ export class MethodsHandler {
                 apiData.active,
             )
         );
-        const response = await Methods.findById(apiData.id);
+        const response = await Methods.findByPk(apiData.id);
         if (response === null) {
             throw new NotFoundException("An error occurred. Method not found");
         }
@@ -114,7 +113,7 @@ export class MethodsHandler {
         if (!validator.isUUID(id)) {
             throw new InputValidationException('Invalid ID: ' + url);
         }
-        const response = await Methods.findById(id, {include: [Resources]});
+        const response = await Methods.findByPk(id, {include: [Resources]});
         if (response === null) {
             throw new NotFoundException("Method not found");
         }

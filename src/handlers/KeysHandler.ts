@@ -6,6 +6,7 @@ import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
 import {Consumers} from "../models/Consumers";
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
 export class KeysHandler {
     protected logger: JsonConsoleLogger;
@@ -49,7 +50,7 @@ export class KeysHandler {
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             this.logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     }
 
@@ -71,9 +72,9 @@ export class KeysHandler {
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
@@ -142,11 +143,11 @@ export class KeysHandler {
             }
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
@@ -189,11 +190,11 @@ export class KeysHandler {
             }
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
@@ -244,11 +245,11 @@ export class KeysHandler {
             }
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }

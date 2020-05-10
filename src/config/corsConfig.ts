@@ -1,10 +1,10 @@
+import {config} from "./config";
 
 export const corsConfig = {
-    origin: (origin: string, callback: any) => {
-        callback(null, true);
-        return;
 
-    },
-    credentials: true,
-    exposedHeaders: ["Development", "Content-Type"]
+    origin: config.allowedDomains,
+    allowedHeaders: config.allowedHeaders,
+    credentials: config.credentials,
+    methods: config.methods,
+    preflightContinue: config.preflightContinue
 };

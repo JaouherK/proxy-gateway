@@ -1,9 +1,19 @@
 const defaultConfig = {
 
-    jsonLimit: '20mb',
     // general config
+    jsonLimit: '20mb',
     port: getParamByDefault(process.env.PORT, "3232"),
     isDevelopment: process.env.IS_DEVELOPMENT === 'true',
+
+    // CORS config
+    allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, '*'),
+    allowedHeaders: getParamByDefault(
+        process.env.ALLOWED_HEADERS,
+        ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"]
+    ),
+    credentials: getParamByDefault(process.env.CORS_CREDENTIALS, true),
+    methods: getParamByDefault(process.env.ALLOWED_MOTHODS, "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE"),
+    preflightContinue: getParamByDefault(process.env.PREFLIGHT_CONTINUE, false),
 
     // for Sequelize to connect to db
     dialect: getParamByDefault(process.env.DB_TYPE, "mysql"),
@@ -12,11 +22,15 @@ const defaultConfig = {
     username: getParamByDefault(process.env.DB_USER, "root"),
     password: getParamByDefault(process.env.DB_PASS, ""),
 
-    //jwt secret
+    // jwt secret
     jwtSecret: getParamByDefault(process.env.JWT_SECRET, "ch@ng3Me"),
 
     // demo mode params
     demoMode: getParamByDefault(process.env.DEMO_MODE, true),
+
+    // parameters for logger
+    timestamp: getParamByDefault(process.env.TIMESTAMP_AVAILABLE, false),
+    colorsOutput: getParamByDefault(process.env.COLOR_LOGS, true)
 };
 
 function getParamByDefault(param: any, defaultParam: any): any {

@@ -1,3 +1,5 @@
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
+
 export enum SupportedMethods {
     get = 'GET',
     any = 'ANY',
@@ -77,7 +79,7 @@ export class MethodsDomains {
         this.contentHandling = (contentHandling !== undefined) ? contentHandling : SupportedContentHandling.pass;
         this.timeout = (timeout !== undefined) ? timeout : 29000;
         this.mockResponseBody = (mockResponseBody !== undefined) ? mockResponseBody : '{}';
-        this.mockResponseCode = (mockResponseCode !== undefined) ? mockResponseCode : 200;
+        this.mockResponseCode = (mockResponseCode !== undefined) ? mockResponseCode : HttpResponseCodes.Ok;
         this.mockResponseContent = (mockResponseContent !== undefined) ? mockResponseContent : SupportedContentTypes.json;
         this.active = (active !== undefined) ? active : true;
     }

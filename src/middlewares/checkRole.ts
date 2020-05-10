@@ -1,6 +1,7 @@
-import {Request, Response, NextFunction} from "express";
+import {NextFunction, Request, Response} from "express";
 import {User} from "../models/User";
 import {config} from "../config/config";
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
 export const checkRole = (roles: Array<string>) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -13,9 +14,9 @@ export const checkRole = (roles: Array<string>) => {
                 const user = await User.findByPk(id);
                 //Check if array of authorized roles includes the user's role
                 if (roles.indexOf(user!.role) > -1) next();
-                else res.status(401).send();
+                else res.status(HttpResponseCodes.Unauthorized).send();
             } catch (id) {
-                res.status(401).send();
+                res.status(HttpResponseCodes.Unauthorized).send();
             }
         } else {
             next();

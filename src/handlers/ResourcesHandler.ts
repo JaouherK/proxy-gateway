@@ -5,9 +5,9 @@ import {InputValidationException} from "../exceptions/InputValidationException";
 import {Namespaces} from "../models/Namespaces";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
-import {Sequelize} from "sequelize";
 
-const Op = Sequelize.Op;
+const {Op} = require("sequelize");
+
 
 export class ResourcesHandler {
 
@@ -66,7 +66,7 @@ export class ResourcesHandler {
                 apiData.resourcesId,
                 apiData.path
             ));
-        const response = await Resources.findById(apiData.id);
+        const response = await Resources.findByPk(apiData.id);
         if (response === null) {
             throw new NotFoundException("An error occurred. Resource not found");
         }
@@ -84,7 +84,7 @@ export class ResourcesHandler {
         if (!validator.isUUID(id)) {
             throw new InputValidationException('Invalid ID: ' + url);
         }
-        const item = await Resources.findById(id, {
+        const item = await Resources.findByPk(id, {
             include: [Resources, Methods]
         });
 
@@ -142,7 +142,7 @@ export class ResourcesHandler {
             throw new InputValidationException('Invalid ID: ' + url);
         }
 
-        const response = await Resources.findById(id, {
+        const response = await Resources.findByPk(id, {
             include: [Methods]
         });
 

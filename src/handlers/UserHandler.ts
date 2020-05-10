@@ -6,6 +6,7 @@ import validator from "validator";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {AuthenticationException} from "../exceptions/AuthenticationException";
 import * as bcrypt from "bcryptjs";
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
 export class UserHandler {
 
@@ -35,7 +36,7 @@ export class UserHandler {
             this.logger.log({managing_route: req.url, payload: req.body, response: users, tag: "manager"});
         } catch (e) {
             this.logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     }
 
@@ -66,11 +67,11 @@ export class UserHandler {
             }
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
@@ -106,16 +107,16 @@ export class UserHandler {
 
             await User.upsert(user);
 
-            res.status(201).send(user);
+            res.status(HttpResponseCodes.Created).send(user);
             this.logger.log({managing_route: req.url, payload: req.body, response: user, tag: "manager"});
 
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
@@ -153,16 +154,16 @@ export class UserHandler {
             //Try to safe, if fails, that means username already in use
             await User.upsert(user);
 
-            res.status(201).send(user);
+            res.status(HttpResponseCodes.Created).send(user);
             this.logger.log({managing_route: req.url, payload: req.body, response: user, tag: "manager"});
 
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }
@@ -182,13 +183,13 @@ export class UserHandler {
             }
             await User.destroy({where: {id}});
             const response = {delete: true};
-            res.status(204).send(response);
+            res.status(HttpResponseCodes.NoContent).send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             this.logger.logError({message: e, tag: "manager"});
         }

@@ -11,6 +11,7 @@ import {NotFoundException} from "../exceptions/NotFoundException";
 import {checkJwt} from "../middlewares/checkJwt";
 import {checkRole} from "../middlewares/checkRole";
 import {UserHandler} from "../handlers/UserHandler";
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
 
 const router: Router = Router();
@@ -32,13 +33,13 @@ router.get('/restartPoints', async (req: Request, res: Response) => {
             process: '♥ FailSafe reloading routes',
             tag: 'manager'
         });
-        res.sendStatus(200);
+        res.status(HttpResponseCodes.Ok).send({status: HttpResponseCodes.Ok});
         process.kill(process.pid);
     } catch (e) {
         logger.logError({
             message: e
         });
-        res.sendStatus(404);
+        res.sendStatus(HttpResponseCodes.NotFound);
     }
 });
 
@@ -53,7 +54,7 @@ router.post('/proxies/save',
             res.send(response);
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             logger.logError({message: e, tag: "manager"});
         }
     });
@@ -69,9 +70,9 @@ router.get('/proxies/:namespace',
             res.send(response);
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -87,7 +88,7 @@ router.get('/proxies',
             res.send(response);
         } catch (e) {
             logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
@@ -103,9 +104,9 @@ router.delete('/proxies/:proxyId',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -122,11 +123,11 @@ router.get('/proxies/exist/:proxyId',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -143,7 +144,7 @@ router.get('/namespaces',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
@@ -157,11 +158,11 @@ router.post('/namespaces',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -179,7 +180,7 @@ router.delete('/namespaces/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
@@ -195,9 +196,9 @@ router.delete('/namespaces/recursive/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -214,11 +215,11 @@ router.get('/namespaces/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -236,7 +237,7 @@ router.get('/proxies/build/:namespace',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
@@ -262,7 +263,7 @@ router.get('/resources',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
@@ -278,9 +279,9 @@ router.delete('/resources/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -296,11 +297,11 @@ router.post('/resources',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -318,7 +319,7 @@ router.get('/resources/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
@@ -334,9 +335,9 @@ router.get('/resources/namespace/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -353,11 +354,11 @@ router.get('/resources/:api/methods',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -373,7 +374,7 @@ router.get('/methods', async (req: Request, res: Response) => {
         logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
     } catch (e) {
         logger.logError({message: e, tag: "manager"});
-        res.status(500).send({error: e.message});
+        res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
     }
 });
 
@@ -387,9 +388,9 @@ router.delete('/methods/:api', async (req: Request, res: Response) => {
         logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
     } catch (e) {
         if (e instanceof InputValidationException) {
-            res.status(409).send({error: e.message});
+            res.status(HttpResponseCodes.Conflict).send({error: e.message});
         } else {
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
         logger.logError({message: e, tag: "manager"});
     }
@@ -404,11 +405,11 @@ router.post('/methods', async (req: Request, res: Response) => {
         logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
     } catch (e) {
         if (e instanceof InputValidationException) {
-            res.status(409).send({error: e.message});
+            res.status(HttpResponseCodes.Conflict).send({error: e.message});
         } else if (e instanceof NotFoundException) {
-            res.status(404).send({error: e.message});
+            res.status(HttpResponseCodes.NotFound).send({error: e.message});
         } else {
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
         logger.logError({message: e, tag: "manager"});
     }
@@ -425,11 +426,11 @@ router.get('/methods/:api', async (req: Request, res: Response) => {
         logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
     } catch (e) {
         if (e instanceof InputValidationException) {
-            res.status(409).send({error: e.message});
+            res.status(HttpResponseCodes.Conflict).send({error: e.message});
         } else if (e instanceof NotFoundException) {
-            res.status(404).send({error: e.message});
+            res.status(HttpResponseCodes.NotFound).send({error: e.message});
         } else {
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
         logger.logError({message: e, tag: "manager"});
     }
@@ -446,7 +447,7 @@ router.get('/consumers',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+            res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
@@ -461,9 +462,9 @@ router.delete('/consumers/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -480,11 +481,11 @@ router.get('/consumers/:api',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }
@@ -501,11 +502,11 @@ router.post('/consumers',
             logger.log({managing_route: req.url, payload, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
+                res.status(HttpResponseCodes.Conflict).send({error: e.message});
             } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
+                res.status(HttpResponseCodes.NotFound).send({error: e.message});
             } else {
-                res.status(500).send({error: e.message});
+                res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
             logger.logError({message: e, tag: "manager"});
         }

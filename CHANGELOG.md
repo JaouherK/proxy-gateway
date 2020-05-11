@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Refactoring logger, router, cron job, config and cluster config
 - Fix cluster issue
+- fix delete recursive of resources
+- Refactor Manager router
 
 ## [0.1.0] - 2020-01-29
 

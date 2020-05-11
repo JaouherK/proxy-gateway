@@ -26,14 +26,13 @@ The process described here has several goals:
 
 - Maintain Proxy-gateway's quality
 - Fix problems that are important to users
-- Enable a sustainable system for CT's maintainers to review contributions
+- Enable a sustainable system for the app maintainers to review contributions
 
 Please follow these steps to help with a better readability:
 - The branch name should follow the following format:
-``ticketId_ticket-title`` for example : ``CX0_DEV-11145_improve-test-coverage``
-- The tag for QA & production should have a description for easier readability
+``ticketId_ticket-title`` for example : ``ticket-001_speed-limiter-config``
 - follow the style guide
-- Please assign one of the maintainers from the list below to the merge request
+- Please assign one of the maintainers from the list below to the pull request
 
 <a id="maintainers-list"/>
 
@@ -42,8 +41,6 @@ Please follow these steps to help with a better readability:
 | Name  	| Role  	|
 |:-:	|:-:	|
 | Jaouher Kharrat   	| owner   	|
-| Agustín Amenábar L.  	| owner   	|
-| Serhii Pashkevych  	| Owner   	|
 
 <a id="style-guides"/>
 

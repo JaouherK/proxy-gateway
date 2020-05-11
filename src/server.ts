@@ -6,7 +6,7 @@ import {ErrorHandler} from "./handlers/ErrorHandler";
 import {GlobalSecurityGroup} from "./middlewares/GlobalSecurityGroup";
 import {MainRouter} from "./routers/MainRouter";
 import {ClusterConfiguration} from "./ClusterConfiguration";
-import {GlobalErrorsMiddleWare} from "./middlewares/GlobalErrorsMiddleWare";
+import {GlobalErrorsMiddleware} from "./middlewares/GlobalErrorsMiddleware";
 
 const app = express();
 const logger = new JsonConsoleLogger();
@@ -16,7 +16,7 @@ app.use(ParsersGroup);
 
 MainRouter.init(app, logger);
 
-app.use(GlobalErrorsMiddleWare.toCallable(logger));
+app.use(GlobalErrorsMiddleware.toCallable(logger));
 
 ClusterConfiguration.init(app, logger);
 

@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import {JsonConsoleLogger} from '../logger/jsonConsoleLogger';
 import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
-class GlobalErrorsMiddleWare {
+class GlobalErrorsMiddleware {
 
     public static toCallable(logger: JsonConsoleLogger) {
         return (error: any, req: Request, res: Response, next: any) => {
@@ -16,4 +16,4 @@ class GlobalErrorsMiddleWare {
     }
 }
 
-export {GlobalErrorsMiddleWare};
+export {GlobalErrorsMiddleware};

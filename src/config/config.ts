@@ -30,7 +30,14 @@ const defaultConfig = {
 
     // parameters for logger
     timestamp: getParamByDefault(process.env.TIMESTAMP_AVAILABLE, false),
-    colorsOutput: getParamByDefault(process.env.COLOR_LOGS, true)
+    colorsOutput: getParamByDefault(process.env.COLOR_LOGS, true),
+
+    // express-slow-down configurations
+    activeSlowDown: getParamByDefault(process.env.ACTIVE_SLOW_DOWN, true),
+    windowMs: getParamByDefault(process.env.SLOW_WINDOW_MS, 60 * 1000),
+    delayAfter: getParamByDefault(process.env.SLOW_DELAY_AFTER, 1000),
+    delayMs: getParamByDefault(process.env.SLOW_EFFECT_MS, 200),
+    maxDelayMs: getParamByDefault(process.env.SLOW_EFFECT_MS, 5 * 1000),
 };
 
 function getParamByDefault(param: any, defaultParam: any): any {

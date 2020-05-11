@@ -1,7 +1,7 @@
 import {Request, Response, Router} from 'express';
 import {ProxyDomain} from "../domains/ProxyDomain";
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
-import {checkJwt} from "../middlewares/checkJwt";
+import {checkJwtMiddleware} from "../middlewares/CheckJwtMiddleware";
 import proxy = require("express-http-proxy");
 
 export class ProxyRouter {
@@ -12,7 +12,7 @@ export class ProxyRouter {
 
         if (prox.authType === 'jwt') {
             logAuth = ' uses jwt auth';
-            router.use(checkJwt);
+            router.use(checkJwtMiddleware);
         }
 
         if (prox.authType === 'apiKey') {

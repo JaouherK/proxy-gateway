@@ -1,4 +1,4 @@
-import {PrimaryKey, Column, CreatedAt, Model, Table, UpdatedAt, HasMany} from "sequelize-typescript";
+import {Column, CreatedAt, HasMany, Model, PrimaryKey, Table, UpdatedAt} from "sequelize-typescript";
 import {Resources} from "./Resources";
 
 @Table
@@ -20,7 +20,7 @@ export class Namespaces extends Model<Namespaces> {
     @Column
     active!: boolean;
 
-    @HasMany(() => Resources)
+    @HasMany(() => Resources, {onDelete: 'CASCADE', onUpdate: 'CASCADE', hooks: true})
     resources!: Resources[];
 
     @CreatedAt

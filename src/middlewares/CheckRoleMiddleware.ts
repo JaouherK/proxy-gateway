@@ -3,7 +3,7 @@ import {User} from "../models/User";
 import {config} from "../config/config";
 import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
-export const checkRole = (roles: Array<string>) => {
+export const checkRoleMiddleware = (roles: Array<string>) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         if (!config.demoMode) {
             //Get the user ID from previous middleware

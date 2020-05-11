@@ -12,7 +12,7 @@ export class Methods extends Model<Methods> {
     @Column
     resourcesId!: string;
 
-    @BelongsTo(() => Resources)
+    @BelongsTo(() => Resources, {onDelete: 'CASCADE', onUpdate: 'CASCADE', hooks: true})
     resource!: Resources;
 
     @Column

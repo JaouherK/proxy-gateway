@@ -8,8 +8,8 @@ import {ConsumersHandler} from "../handlers/ConsumersHandler";
 import {KeysHandler} from "../handlers/KeysHandler";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
-import {checkJwt} from "../middlewares/checkJwt";
-import {checkRole} from "../middlewares/checkRole";
+import {checkJwtMiddleware} from "../middlewares/CheckJwtMiddleware";
+import {checkRoleMiddleware} from "../middlewares/CheckRoleMiddleware";
 import {UserHandler} from "../handlers/UserHandler";
 import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
@@ -47,7 +47,7 @@ router.get('/restartPoints', async (req: Request, res: Response) => {
 
 // save routes to proxy data
 router.post('/proxies/save',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const response = await proxyHandler.saveRoutes(req.body);
@@ -61,7 +61,7 @@ router.post('/proxies/save',
 
 // get all proxies of a namespace
 router.get('/proxies/:namespace',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const namespaceId = req.params.namespace;
@@ -80,7 +80,7 @@ router.get('/proxies/:namespace',
 
 // get all proxies
 router.get('/proxies',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const response = await proxyHandler.getAll();
@@ -94,7 +94,7 @@ router.get('/proxies',
 
 // delete a proxy by ID
 router.delete('/proxies/:proxyId',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const proxyId = req.params.proxyId;
@@ -114,7 +114,7 @@ router.delete('/proxies/:proxyId',
 
 // check if a proxy exists by id
 router.get('/proxies/exist/:proxyId',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const proxyId = req.params.proxyId;
@@ -136,7 +136,7 @@ router.get('/proxies/exist/:proxyId',
 /***************************** NAMESPACE ****************************************/
 // get all namespaces
 router.get('/namespaces',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const response = await namespaceHandler.getAll();
@@ -150,7 +150,7 @@ router.get('/namespaces',
 
 // create or update namespace
 router.post('/namespaces',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const response = await namespaceHandler.addOrUpdate(req.body, req.url);
@@ -170,7 +170,7 @@ router.post('/namespaces',
 
 // delete an namespace by id
 router.delete('/namespaces/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -186,7 +186,7 @@ router.delete('/namespaces/:api',
 
 // delete recursive namespace
 router.delete('/namespaces/recursive/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -206,7 +206,7 @@ router.delete('/namespaces/recursive/:api',
 
 // get a namespace by id
 router.get('/namespaces/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -227,7 +227,7 @@ router.get('/namespaces/:api',
 
 // build route tree
 router.get('/proxies/build/:namespace',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.namespace;
@@ -246,7 +246,7 @@ router.get('/proxies/build/:namespace',
 //test element
 router.post(
     "/swagger",
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         await namespaceHandler.generateFromSwagger(req, res);
     });
@@ -254,7 +254,7 @@ router.post(
 /******************************** RESOURCES *************************************/
 // get all dynamic resources
 router.get('/resources',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const response = await resourceHandler.getAll();
@@ -268,8 +268,8 @@ router.get('/resources',
     });
 
 // delete a resource by id
-router.delete('/resources/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+router.delete('/resources/recursive/:api',
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -289,7 +289,7 @@ router.delete('/resources/:api',
 
 // create or update resource
 router.post('/resources',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const response = await resourceHandler.addOrUpdate(req.body, req.url);
@@ -309,7 +309,7 @@ router.post('/resources',
 
 // get resource by id
 router.get('/resources/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -325,7 +325,7 @@ router.get('/resources/:api',
 
 // get an end point by Namespace id
 router.get('/resources/namespace/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -345,7 +345,7 @@ router.get('/resources/namespace/:api',
 
 // get an end point by id
 router.get('/resources/:api/methods',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -439,7 +439,7 @@ router.get('/methods/:api', async (req: Request, res: Response) => {
 /***************************************************************************************/
 // get all consumers
 router.get('/consumers',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const response = await consumerHandler.getAll();
@@ -453,7 +453,7 @@ router.get('/consumers',
 
 // delete a consumer by id
 router.delete('/consumers/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -472,7 +472,7 @@ router.delete('/consumers/:api',
 
 // get a consumer by id
 router.get('/consumers/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const api = req.params.api;
@@ -493,7 +493,7 @@ router.get('/consumers/:api',
 
 // create or update consumer
 router.post('/consumers',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         try {
             const payload = req.body;
@@ -515,14 +515,14 @@ router.post('/consumers',
 
 // get all API keys
 router.get('/apiKeys',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         await keyHandler.getAll(req, res);
     });
 
 // delete a  API key by id
 router.delete('/apiKeys/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         const api = req.params.api;
         await keyHandler.deleteOne(req, res, api);
@@ -530,7 +530,7 @@ router.delete('/apiKeys/:api',
 
 // get a  API key by id
 router.get('/apiKeys/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         const api = req.params.api;
         await keyHandler.getById(req, res, api);
@@ -538,7 +538,7 @@ router.get('/apiKeys/:api',
 
 // get a  API key by ConsumerId
 router.get('/apiKeys/consumer/:api',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         const api = req.params.api;
         await keyHandler.getByConsumerId(req, res, api);
@@ -546,7 +546,7 @@ router.get('/apiKeys/consumer/:api',
 
 // create or update  API keys
 router.post('/apiKeys',
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         await keyHandler.addOrUpdate(req, res);
     });
@@ -554,7 +554,7 @@ router.post('/apiKeys',
 
 //Get all users
 router.get("/user",
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         await userHandler.getAll(req, res);
     });
@@ -562,7 +562,7 @@ router.get("/user",
 // Get one user
 router.get(
     "/user/:id",
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         const id = req.params.id;
         await userHandler.getById(req, res, id);
@@ -571,7 +571,7 @@ router.get(
 
 //Create a new user
 router.post("/user",
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         await userHandler.createUser(req, res);
     });
@@ -579,7 +579,7 @@ router.post("/user",
 //Edit one user
 router.patch(
     "/user/:id",
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         const id = req.params.id;
         await userHandler.editUser(req, res, id);
@@ -589,7 +589,7 @@ router.patch(
 //Delete one user
 router.delete(
     "/user/:id",
-    [checkJwt, checkRole(["ADMIN"])],
+    [checkJwtMiddleware, checkRoleMiddleware(["ADMIN"])],
     async (req: Request, res: Response) => {
         const id = req.params.id;
         await userHandler.deleteOne(req, res, id);

@@ -38,6 +38,10 @@ const defaultConfig = {
     delayAfter: getParamByDefault(process.env.SLOW_DELAY_AFTER, 1000),
     delayMs: getParamByDefault(process.env.SLOW_EFFECT_MS, 200),
     maxDelayMs: getParamByDefault(process.env.SLOW_EFFECT_MS, 5 * 1000),
+
+    // Helmet configuration
+    enableHelmet: getParamByDefault(process.env.ENABLE_HELMET, true),
+
 };
 
 function getParamByDefault(param: any, defaultParam: any): any {

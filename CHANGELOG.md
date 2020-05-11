@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+
 ## [0.2.0] - 2020-05-11
 ### Added
 - HTTP response codes as constants 
+- Get speed limiter configs from config file & refactor relative code
 
 ### Changed
 - Refactoring logger, router, cron job, config and cluster config

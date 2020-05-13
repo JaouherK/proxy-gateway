@@ -126,7 +126,7 @@ describe('ProxiesHandler', () => {
 
     it("Should check if proxy does not exist by ID", async () => {
 
-        const spyOnProxiesDeleteById = spyOn<any>(Proxies, 'findById');
+        const spyOnProxiesDeleteById = spyOn<any>(Proxies, 'findByPk');
         spyOnProxiesDeleteById.and.callFake(async () => {
             return proxiesMock.findById("c3d8ea3b-47e3-48b6-b5f0-f7c78ad36e1c").thenReturn(null);
         });
@@ -141,12 +141,12 @@ describe('ProxiesHandler', () => {
 
     it("Should check if proxy exist by ID but pending status", async () => {
 
-        const spyOnProxiesDeleteById = spyOn<any>(Proxies, 'findById');
+        const spyOnProxiesDeleteById = spyOn<any>(Proxies, 'findByPk');
         spyOnProxiesDeleteById.and.callFake(async () => {
             return proxiesMock.findById("c3d8ea3b-47e3-48b6-b5f0-f7c78ad36e1c");
         });
 
-        const spyOnMethodById = spyOn<any>(Methods, 'findById');
+        const spyOnMethodById = spyOn<any>(Methods, 'findByPk');
         spyOnMethodById.and.callFake(async () => {
             return methodsAltMock.findById("c3d8ea3b-47e3-48b6-b5f0-f7c78ad36e1c");
         });

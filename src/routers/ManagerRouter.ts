@@ -17,7 +17,7 @@ router.use('/resources', ResourcesRouter);
 router.use('/methods', MethodsRouter);
 router.use('/users', UsersRouter);
 router.use('/keys', ApiKeysRouter);
-router.use('/keys', ConsumersRouter);
+router.use('/consumers', ConsumersRouter);
 router.use('/config', ConfigRouter);
 
 export const ManagerRouter: Router = router;

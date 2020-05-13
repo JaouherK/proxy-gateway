@@ -193,7 +193,7 @@ describe('ResourcesHandler', () => {
 
     it("Should return resource by ID", async () => {
 
-        const spyOnMethodFindById = spyOn<any>(Resources, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Resources, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return resourcesMock.findById("00e83fdf-80af-4981-bc3e-c5bf00e688b5", {include: [Resources, Methods]});
         });
@@ -208,7 +208,7 @@ describe('ResourcesHandler', () => {
 
     it("Should return resource by ID", async () => {
 
-        const spyOnMethodFindById = spyOn<any>(Resources, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Resources, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return resourcesMock.findById("00e83fdf-80af-4981-bc3e-c5bf00e688b5", {include: [Resources, Methods]});
         });
@@ -223,7 +223,7 @@ describe('ResourcesHandler', () => {
 
     it("Should throw not found exception if not found id", async () => {
 
-        const spyOnMethodFindById = spyOn<any>(Resources, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Resources, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return resourcesMock.findById("00e83fdf-80af-4981-bc3e-c5bf00e688b5", {include: [Resources, Methods]}).thenReturn(null);
         });
@@ -237,7 +237,7 @@ describe('ResourcesHandler', () => {
 
     it("Should return method of a resource by ID", async () => {
 
-        const spyOnMethodFindById = spyOn<any>(Resources, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Resources, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return resourcesMock.findById("00e83fdf-80af-4981-bc3e-c5bf00e688b5", {include: [Methods]});
         });
@@ -252,7 +252,7 @@ describe('ResourcesHandler', () => {
 
     it("Should throw not found exception if not found id", async () => {
 
-        const spyOnMethodFindById = spyOn<any>(Resources, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Resources, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return resourcesMock.findById("00e83fdf-80af-4981-bc3e-c5bf00e688b5", {include: [Methods]}).thenReturn(null);
         });
@@ -359,7 +359,7 @@ describe('ResourcesHandler', () => {
             return resourcesMock.upsert(resource);
         });
 
-        const spyOnResourceFindById = spyOn<any>(Resources, 'findById');
+        const spyOnResourceFindById = spyOn<any>(Resources, 'findByPk');
         spyOnResourceFindById.and.callFake(async () => {
             return resourcesMock.findById("00e83fdf-80af-4981-bc3e-c5bf00e688b5").thenReturn(null);
         });
@@ -397,7 +397,7 @@ describe('ResourcesHandler', () => {
             return resourcesMock.upsert(resource);
         });
 
-        const spyOnResourceFindById = spyOn<any>(Resources, 'findById');
+        const spyOnResourceFindById = spyOn<any>(Resources, 'findByPk');
         spyOnResourceFindById.and.callFake(async () => {
             return resourcesMock.findById("00e83fdf-80af-4981-bc3e-c5bf00e688b5");
         });

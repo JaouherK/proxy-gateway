@@ -80,7 +80,7 @@ describe('NamespacesHandler', () => {
 
     it("Should return namepspace by ID", async () => {
 
-        const spyOnNamepsaceFindById = spyOn<any>(Namespaces, 'findById');
+        const spyOnNamepsaceFindById = spyOn<any>(Namespaces, 'findByPk');
         spyOnNamepsaceFindById.and.callFake(async () => {
             return namespacesMock.findById("09ba15ba-bd05-414a-9b36-5e1f1b4178ce", {include: [Resources]});
         });
@@ -96,7 +96,7 @@ describe('NamespacesHandler', () => {
 
     it("Should throw not found exception if not found namespace by id", async () => {
 
-        const spyOnNamepsaceFindById = spyOn<any>(Namespaces, 'findById');
+        const spyOnNamepsaceFindById = spyOn<any>(Namespaces, 'findByPk');
         spyOnNamepsaceFindById.and.callFake(async () => {
             return namespacesMock.findById("09ba15ba-bd05-414a-9b36-5e1f1b4178ce", {include: [Resources]}).thenReturn(null);
         });

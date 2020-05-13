@@ -30,18 +30,17 @@ describe('MethodsHandler', () => {
             mockResponseBody: "{\"description\": \"Sample description for crm-test\"}",
             mockResponseCode: 200,
             mockResponseContent: "application/json",
+        createdAt: "2020-01-14T11:55:23.000Z",
+        updatedAt: "2020-01-14T11:55:23.000Z",
+        resource: {
+            id: "353dd787-c746-42c7-aa9e-50d0e72998d4",
+            namespacesId: "7de17ec5-a297-4ce5-8c6a-842d3b48118d",
+            resourcesId: null,
+            path: "",
             createdAt: "2020-01-14T11:55:23.000Z",
-            updatedAt: "2020-01-14T11:55:23.000Z",
-            resource: {
-                id: "353dd787-c746-42c7-aa9e-50d0e72998d4",
-                namespacesId: "7de17ec5-a297-4ce5-8c6a-842d3b48118d",
-                resourcesId: null,
-                path: "",
-                createdAt: "2020-01-14T11:55:23.000Z",
-                updatedAt: "2020-01-14T11:55:23.000Z"
-            }
+            updatedAt: "2020-01-14T11:55:23.000Z"
         }
-    ;
+    };
 
     const method = {
         resourcesId: "353dd787-c746-42c7-aa9e-50d0e72998d4",
@@ -132,7 +131,7 @@ describe('MethodsHandler', () => {
 
     it("Should return method by ID", async () => {
 
-        const spyOnMethodFindById = spyOn<any>(Methods, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Methods, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return methodsMock.findById("0a55f9ea-5001-428c-a0f2-68c9cdbfab60", {include: [Resources]});
         });
@@ -161,7 +160,7 @@ describe('MethodsHandler', () => {
 
     it("Should throw not found exception if not found id", async () => {
 
-        const spyOnMethodFindById = spyOn<any>(Methods, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Methods, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return methodsMock.findById("004a3bb1-f215-44bb-ae5a-04f1139ed22d", {include: [Resources]}).thenReturn(null);
         });
@@ -294,7 +293,7 @@ describe('MethodsHandler', () => {
             return methodsMock.upsert(method);
         });
 
-        const spyOnMethodFindById = spyOn<any>(Methods, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Methods, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return methodsMock.findById("0a55f9ea-5001-428c-a0f2-68c9cdbfab60").thenReturn(null);
         });
@@ -336,7 +335,7 @@ describe('MethodsHandler', () => {
             return methodsMock.upsert(method);
         });
 
-        const spyOnMethodFindById = spyOn<any>(Methods, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Methods, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return methodsMock.findById("0a55f9ea-5001-428c-a0f2-68c9cdbfab60");
         });
@@ -376,7 +375,7 @@ describe('MethodsHandler', () => {
             return methodsMock.upsert(methodHttp);
         });
 
-        const spyOnMethodFindById = spyOn<any>(Methods, 'findById');
+        const spyOnMethodFindById = spyOn<any>(Methods, 'findByPk');
         spyOnMethodFindById.and.callFake(async () => {
             return methodsMock.findById("0a55f9ea-5001-428c-a0f2-68c9cdbfab60");
         });

@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
-import {JsonConsoleLogger} from "../logger/jsonConsoleLogger";
 import {config} from "../config/config";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 
 
 /******************* Slow down Logic ****************************/

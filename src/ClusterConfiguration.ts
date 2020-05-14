@@ -1,5 +1,5 @@
-import {JsonConsoleLogger} from "./logger/jsonConsoleLogger";
 import {config} from "./config/config";
+import {JsonConsoleLogger} from "./logger/JsonConsoleLogger";
 
 const cluster = require('cluster');
 // worker array that keeps relative PIDs

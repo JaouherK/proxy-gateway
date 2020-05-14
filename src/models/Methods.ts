@@ -1,4 +1,4 @@
-import {PrimaryKey, Column, CreatedAt, Model, Table, UpdatedAt, ForeignKey, BelongsTo, DataType} from "sequelize-typescript";
+import {BelongsTo, Column, CreatedAt, DataType, ForeignKey, Model, PrimaryKey, Table, UpdatedAt} from "sequelize-typescript";
 import {Resources} from "./Resources";
 
 @Table
@@ -12,7 +12,7 @@ export class Methods extends Model<Methods> {
     @Column
     resourcesId!: string;
 
-    @BelongsTo(() => Resources)
+    @BelongsTo(() => Resources, {onDelete: 'CASCADE', onUpdate: 'CASCADE', hooks: true})
     resource!: Resources;
 
     @Column
@@ -55,7 +55,7 @@ export class Methods extends Model<Methods> {
     mockResponseBody!: string;
 
     @Column
-    mockResponseCode!: string;
+    mockResponseCode!: number;
 
     @Column
     mockResponseContent!: string;

@@ -1,5 +1,6 @@
-#### A Microservices API Gateway Built Using Typescript
+A Microservices API Gateway Built Using Typescript
 ----
+![v0.2.0](https://img.shields.io/badge/version-0.2.0-green)
 
 Proxy Gateway is an API gateway that hovers over microservices or serverless architecture. It is completely dissociated from the stack used for the other services. It secures and exposes your services with a complete control over all its functionality and behaviour.
 
@@ -17,6 +18,7 @@ This repository exposes an API interface to manage these routs. A frontend inter
 - Integrates with frontend library
 - Processes authenticated and public 
 - Included a Postman collection to start testing your API interface
+- Output logs ready for easy parsing by logstash or Splunk
 - Logging for major requests and incidents with levels of seriousness
 - Logging uses tags to easily be fetched through logs grabber 
 
@@ -32,7 +34,7 @@ $ npm install
 
 #### Configuration
 
-In your db server currently only mysql(but easily changes to any of the following: mariadb,sqlite,postgres,mssql) and create a database like ```gateway```.
+In your db server currently only mysql (but easily changes to any of the following: mariadb,sqlite,postgres,mssql) and create a database like ```gateway```.
 
 Open the config file within ```src``` folder and update the needed values 
 
@@ -50,10 +52,24 @@ const defaultConfig = {
 
 #### Ignition
 
+##### Solution 1 - Using Docker compose
+
+Execute the following command to start the docker container:
+```bash
+$ docker-compose up
+```
+This compose will start also a mysql container
+
+##### Solution 2 - Starting the node server locally 
 Execute the following command to start the server:
 ```bash
 $ yarn build
 $ yarn start
+```
+
+For development purposes you can use this nodemon ignition 
+```bash
+$ yarn start:watch
 ```
 
 this will initialize the database and its tables if not exist. It will also expose initially the Manager and health check routes. Use the Postman collection to start creating your routing system.

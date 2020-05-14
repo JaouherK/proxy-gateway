@@ -1,5 +1,4 @@
 import {Request, Response} from 'express';
-import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {Namespaces} from "../models/Namespaces";
 import {Resources} from "../models/Resources";
 import {Methods} from "../models/Methods";
@@ -9,262 +8,295 @@ import {InvalidRoutingStructureException} from "../exceptions/InvalidRoutingStru
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
+import SwaggerParser from "swagger-parser";
 
 
 export class NamespacesHandler {
-    protected logger: JsonConsoleLogger;
-
-    constructor(logger: JsonConsoleLogger) {
-        this.logger = logger;
-    }
-
-    /**
-     * kill the working process to reload configuration
-     * @param  {Request} req
-     * @param  {Response} res
-     * @return {any}
-     */
-    public async startAll(req: Request, res: Response): Promise<any> {
-        try {
-            this.logger.logSecurity({
-                managing_route: req.url,
-                payload: req.body,
-                process: '♥ FailSafe reloading routes',
-                tag: 'manager'
-            });
-            res.sendStatus(200);
-            process.kill(process.pid);
-        } catch (e) {
-            this.logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
-        }
-    }
 
     /**
      * get all namespaces/stores
-     * @param  {Request} req
-     * @param  {Response} res
      * @return {any}
      */
-    public async getAll(req: Request, res: Response): Promise<any> {
-        try {
-            const response = await Namespaces.findAll();
-            res.send(response);
-            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
+    public async getAll(): Promise<any> {
+        return Namespaces.findAll();
+    }
 
-        } catch (e) {
-            this.logger.logError({message: e, tag: "manager"});
-            res.status(500).send({error: e.message});
+    public async deleteOne(id: string, url: string): Promise<any> {
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
         }
+        return Namespaces.destroy({where: {id}});
     }
 
     /**
      * delete a namespace and all its tree structure
-     * @param  {Request} req
-     * @param  {Response} res
      * @param  {string} id uuid v4 format
+     * @param  {string} url
      * @return {any}
      */
-    public async deleteRecursiveOne(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            const allResources: Resources[] = await Resources.findAll({
-                where: {namespacesId: id},
-                include: [Methods]
-            });
-
-            // destroy first the methods
-            await allResources.forEach((resource: Resources) => {
-                Methods.destroy({where: {resourcesId: resource.id}});
-            });
-
-            //destroy the resources
-            await Resources.destroy({where: {namespacesId: id}});
-
-            // destroy finally the namespace
-            Namespaces.destroy({where: {id}});
-
-            const response = {delete: true};
-            res.send(response);
-            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
+    public async deleteRecursiveOne(id: string, url: string): Promise<any> {
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
         }
+        const allResources: Resources[] = await Resources.findAll({
+            where: {namespacesId: id},
+            include: [Methods]
+        });
+
+        // destroy first the methods
+        await allResources.forEach((resource: Resources) => {
+            Methods.destroy({where: {resourcesId: resource.id}});
+        });
+
+        // destroy the resources
+        await Resources.destroy({where: {namespacesId: id}});
+
+        // destroy finally the namespace
+        return Namespaces.destroy({where: {id}});
     }
 
     /**
      * add/update namespace
-     * @param  {Request} req
-     * @param  {Response} res
      * @return {any}
+     * @param apiData
+     * @param url
      */
-    public async addOrUpdate(req: Request, res: Response): Promise<any> {
-        try {
+    public async addOrUpdate(apiData: any, url: string): Promise<any> {
 
-            const isUpdate = req.body.hasOwnProperty("id");
+        const isUpdate = apiData.hasOwnProperty("id");
 
-            const apiData = req.body;
-            apiData.route = validator.whitelist(apiData.route, 'a-zA-Z0-9-_');
-            if (!isUpdate) {
-                if (!(await this.uniqueRoute(apiData.route))) {
-                    throw new InputValidationException('Namespace already exists');
-                }
-                const uuid = require('uuid-v4');
-                apiData.id = uuid();
+        apiData.route = validator.whitelist(apiData.route, 'a-zA-Z0-9-_');
+        if (!isUpdate) {
+            if (!(await this.uniqueRoute(apiData.route))) {
+                throw new InputValidationException('Namespace already exists');
             }
-
-            if (!validator.isUUID(apiData.id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            if ((validator.isEmpty(apiData.route)) || (validator.contains(apiData.route, '/'))) {
-                throw new InputValidationException('Invalid namespace');
-            }
-
-            apiData.type = (apiData.type !== undefined) ? apiData.type : 'REST';
-            apiData.description = (apiData.description !== undefined) ? apiData.description : 'Sample description for ' + apiData.route;
-            apiData.active = (apiData.active !== undefined) ? apiData.active : true;
-
-            await Namespaces.upsert(apiData);
-
-            if (!isUpdate) {
-                const uuid = require('uuid-v4');
-                const resourceId = uuid();
-                await Resources.upsert(
-                    new ResourcesDomain(
-                        apiData.id,
-                        resourceId
-                    ));
-
-                await Methods.upsert(
-                    new MethodsDomains(
-                        resourceId,
-                        undefined,
-                        'GET',
-                        'none',
-                        undefined,
-                        undefined,
-                        undefined,
-                        'MOCK',
-                        'GET',
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        '{"description": "' + apiData.description + '"}'
-                    ));
-            }
-
-            const response = await Namespaces.findByPk(apiData.id, {
-                include: [Resources]
-            });
-            if (response === null) {
-                throw new NotFoundException("Namespace not found");
-            } else {
-                res.send(response);
-                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-            }
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
+            const uuid = require('uuid-v4');
+            apiData.id = uuid();
         }
+
+        if (!validator.isUUID(apiData.id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
+        }
+        if ((validator.isEmpty(apiData.route)) || (validator.contains(apiData.route, '/'))) {
+            throw new InputValidationException('Invalid namespace');
+        }
+
+        apiData.type = (apiData.type !== undefined) ? apiData.type : 'REST';
+        apiData.description = (apiData.description !== undefined) ? apiData.description : 'Sample description for ' + apiData.route;
+        apiData.active = (apiData.active !== undefined) ? apiData.active : true;
+
+        await Namespaces.upsert(apiData);
+
+        if (!isUpdate) {
+            const uuid = require('uuid-v4');
+            const resourceId = uuid();
+            await Resources.upsert(
+                new ResourcesDomain(
+                    apiData.id,
+                    resourceId
+                ));
+
+            await Methods.upsert(
+                new MethodsDomains(
+                    resourceId,
+                    undefined,
+                    'GET',
+                    'none',
+                    undefined,
+                    undefined,
+                    undefined,
+                    'MOCK',
+                    'GET',
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    '{"description": "' + apiData.description + '"}'
+                ));
+        }
+
+        const response = await Namespaces.findByPk(apiData.id, {
+            include: [Resources]
+        });
+        if (response === null) {
+            throw new NotFoundException("An error occurred. Store not found");
+        }
+
+        return response;
     }
 
     /**
      * get namespace by ID
-     * @param  {Request} req
-     * @param  {Response} res
      * @param  {string} id  uuid v4 format
+     * @param  {string} url
      * @return {any}
      */
-    public async getById(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            const response = await Namespaces.findByPk(id, {
-                include: [Resources]
-            });
-            if (response !== null) {
-                res.send(response);
-                this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-            } else {
-                throw new NotFoundException("Namespace not found");
-            }
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else if (e instanceof NotFoundException) {
-                res.status(404).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
+    public async getById(id: string, url: string): Promise<any> {
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
         }
+        const response = await Namespaces.findByPk(id, {
+            include: [Resources]
+        });
+        if (response === null) {
+            throw new NotFoundException("Namespace not found");
+        }
+        return response;
     }
 
     /**
      * get the full tree of the namespace including resources and methods
-     * @param  {Request} req
-     * @param  {Response} res
      * @param  {string} id  uuid v4 format
+     * @param url
      * @return {any}
      */
-    public async buildRoute(req: Request, res: Response, id: string): Promise<any> {
-        try {
-            if (!validator.isUUID(id)) {
-                throw new InputValidationException('Invalid ID: ' + req.url);
-            }
-            const item = await Namespaces.findByPk(id);
+    public async buildRoute(id: string, url: string): Promise<any> {
 
-            const f = 0;
-            const arr: any[] = [];
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
+        }
+        const item = await Namespaces.findByPk(id);
 
-            const allResources: Resources[] = await Resources.findAll({
-                where: {namespacesId: id},
-                include: [Methods]
+        const f = 0;
+        const arr: any[] = [];
+
+        const allResources: Resources[] = await Resources.findAll({
+            where: {namespacesId: id},
+            include: [Methods]
+        });
+
+        const container: ResourcesDomain[] = [];
+
+        allResources.forEach((element: Resources) => {
+            container.push(new ResourcesDomain(
+                element.namespacesId,
+                element.id,
+                element.resourcesId,
+                element.path,
+                element.methods,
+                [],
+            ));
+        });
+
+        // get the tree here
+        const tree = this.list_to_tree(container);
+
+        return this.getDescendants(tree[0], arr, f, item!.route);
+    }
+
+    public async generateFromSwagger(req: Request, res: Response): Promise<any> {
+
+        //todo: unicity of route
+        const namespace = req.body.namespace;
+        const myAPI = req.body.swag;
+        let apiData: any = {};
+
+        if ((validator.isEmpty(namespace)) || (validator.contains(namespace, '/'))) {
+            throw new InputValidationException('Invalid namespace');
+        }
+
+
+        let api = await SwaggerParser.validate(myAPI);
+
+
+        apiData.route = namespace;
+        apiData.type = 'REST';
+        apiData.description = (api.info.title !== undefined) ? api.info.title : 'Sample description for ' + namespace;
+        apiData.getDescription = (api.info.description !== undefined) ? api.info.description : 'Sample description for ' + namespace;
+        apiData.active = true;
+        const uuid = require('uuid-v4');
+        apiData.id = uuid();
+
+        await Namespaces.upsert(apiData);
+        // const resourceId = uuid();
+        // await Resources.upsert(
+        //     {
+        //         namespacesId: apiData.id,
+        //
+        //         id : resourceId,
+        //         resourcesId : null,
+        //         path :  '',
+        //         methods : [],
+        //         childResources : []
+        //     },
+        // );
+        // await Methods.upsert(
+        //     new MethodsDomains(
+        //         resourceId,
+        //         undefined,
+        //         'GET',
+        //         'none',
+        //         undefined,
+        //         undefined,
+        //         undefined,
+        //         'MOCK',
+        //         'GET',
+        //         undefined,
+        //         undefined,
+        //         undefined,
+        //         undefined,
+        //         '{"description": "' + apiData.getDescription + '"}'
+        //     ));
+
+        const d: string = myAPI.basePath;
+        const t = d.split('/');
+
+        let childId = '';
+        let parentId = null;
+
+        await t.forEach(async (item) => {
+            console.log(item);
+            parentId = childId;
+            childId = uuid();
+            console.log({
+                namespacesId: apiData.id,
+                id: childId,
+                resourcesId: parentId,
+                path: validator.whitelist(item, 'a-zA-Z0-9-_'),
+                methods: [],
+                childResources: []
             });
 
-            const container: ResourcesDomain[] = [];
 
-            allResources.forEach((element: Resources) => {
-                container.push(new ResourcesDomain(
-                    element.namespacesId,
-                    element.id,
-                    element.resourcesId,
-                    element.path,
-                    element.methods,
-                    [],
-                ));
-            });
+            await Resources.upsert(
+                {
+                    namespacesId: apiData.id,
+                    id: childId,
+                    resourcesId: parentId,
+                    path: validator.whitelist(item, 'a-zA-Z0-9-_'),
+                    methods: [],
+                    childResources: []
+                },
+            );
 
-            // get the tree here
-            const tree = this.list_to_tree(container);
+            // await Methods.upsert(
+            //     new MethodsDomains(
+            //         childId,
+            //         undefined,
+            //         'GET',
+            //         'none',
+            //         undefined,
+            //         undefined,
+            //         undefined,
+            //         'MOCK',
+            //         'GET',
+            //         undefined,
+            //         undefined,
+            //         undefined,
+            //         undefined,
+            //         '{}'
+            //     ));
 
-            const response = this.getDescendants(tree[0], arr, f, item!.route);
+        });
 
+
+        const response = await Namespaces.findByPk(apiData.id, {
+            include: [Resources]
+        });
+        if (response === null) {
+            throw new NotFoundException("Namespace not initialised");
+        } else {
             res.send(response);
-
-            this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
-        } catch (e) {
-            if (e instanceof InputValidationException) {
-                res.status(409).send({error: e.message});
-            } else {
-                res.status(500).send({error: e.message});
-            }
-            this.logger.logError({message: e, tag: "manager"});
         }
 
     }
@@ -399,6 +431,6 @@ export class NamespacesHandler {
      */
     private async uniqueRoute(route: string): Promise<boolean> {
         const counter = await Namespaces.count({where: {'route': route}});
-        return (counter === 0)
+        return (counter === 0);
     }
 }

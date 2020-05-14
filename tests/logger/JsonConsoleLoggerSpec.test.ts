@@ -1,4 +1,5 @@
 import {JsonConsoleLogger} from "../../src/logger/JsonConsoleLogger";
+
 const chalk = require('chalk');
 
 const mockLoggerData = {
@@ -38,14 +39,14 @@ describe('JsonConsoleLogger', () => {
         logger.logError(mockLoggerErrorData);
         const error = chalk.keyword('orange');
         expect(spyOnConsole).toHaveBeenCalledWith(
-            error(JSON.stringify(mockLoggerErrorData, ["timestamp", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"])));
+            error(JSON.stringify(mockLoggerErrorData)));
     });
 
     it('should execute log Security function', () => {
         logger.logSecurity(mockLoggerSecurityData);
         const security = chalk.bold.red;
         expect(spyOnConsole).toHaveBeenCalledWith(
-            security(JSON.stringify(mockLoggerSecurityData, ["timestamp", "message", "arguments", "type", "name", "stack", "destination", "body", "process", "tag"]))
+            security(JSON.stringify(mockLoggerSecurityData))
         );
     });
 });

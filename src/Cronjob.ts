@@ -1,19 +1,21 @@
 import {JsonConsoleLogger} from "./logger/JsonConsoleLogger";
 
-export class CronJob {
-    public start() {
-        const logger = new JsonConsoleLogger();
+const cronjob = require('cron').CronJob;
 
+
+export class CronJob {
+    public static start(logger: JsonConsoleLogger) {
+        CronJob.scheduledRestart(logger);
+    }
+
+    private static scheduledRestart(logger: JsonConsoleLogger) {
         // cronJob to restart the server every night
-        const cronJob = require('cron').CronJob;
-        const restart = new cronJob({
+
+        const restart = new cronjob({
             cronTime: '00 30 00 * * *',
             onTick() {
                 const d = new Date();
-                logger.logSecurity({
-                    process: d + " - Scheduled service restart ♥ FAILSAFE SHUTDOWN.",
-                    tag: 'cluster'
-                });
+                logger.logSecurity({message: d + " - Scheduled service restart ♥ FAILSAFE SHUTDOWN.", tag: 'cronJob'});
                 process.kill(process.pid);
             },
             start: false,

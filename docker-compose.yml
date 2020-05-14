@@ -1,6 +1,7 @@
 version: '3.3'
 
 services:
+
   ## gateway
   proxy-gateway:
     build:
@@ -26,11 +27,12 @@ services:
       - ./:/usr/src/gateway/
     ports:
       - 3000:3000
+
   ## mysql
   db:
     image: mysql:5
     container_name: db
-    restart: always
+    restart: "no"
     environment:
       MYSQL_ROOT_PASSWORD: 'my-secret-pw'
       MYSQL_DATABASE: 'gateway'

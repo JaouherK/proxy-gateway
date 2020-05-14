@@ -1,11 +1,12 @@
-import {Request, Response, NextFunction} from "express";
+import {NextFunction, Request, Response} from "express";
 import * as jwt from "jsonwebtoken";
 import {config} from "../config/config";
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
 const logger = new JsonConsoleLogger();
 
-export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
+export const checkJwtMiddleware = (req: Request, res: Response, next: NextFunction) => {
     if (!config.demoMode) {
         //Get the jwt token from the head
         const token = <string>req.headers["auth"];
@@ -17,7 +18,7 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
             res.locals.jwtPayload = jwtPayload;
         } catch (error) {
             //If token is not valid, respond with 401 (unauthorized)
-            res.status(401).send();
+            res.status(HttpResponseCodes.Unauthorized).send();
             logger.logError({message: "JWT Token not verified for " + req.url, tag: "jwt"});
             return;
         }

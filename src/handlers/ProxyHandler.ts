@@ -1,4 +1,3 @@
-import {Proxies} from "../models/Proxies";
 import {InputValidationException} from "../exceptions/InputValidationException";
 import validator from "validator";
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
@@ -9,14 +8,10 @@ import {Methods} from "../models/Methods";
 import {Consumers} from "../models/Consumers";
 import {Keys} from "../models/Keys";
 import {User} from "../models/User";
+import {Proxies} from "../models/Proxies";
 import {sequelize} from "../sequelize";
 
 export class ProxyHandler {
-
-    constructor() {
-        sequelize.addModels([Proxies]);
-
-    }
 
     /**
      * get all proxies
@@ -82,26 +77,11 @@ export class ProxyHandler {
         return {delete: true};
     }
 
-    /**
-     * check if proxy exist by ID
-     * @param  {string} id  uuid v4 format
-     * @return {any}
-     */
-    public async existById(id: string): Promise<any> {
-        if (!validator.isUUID(id)) {
-            throw new InputValidationException('Invalid ID');
-        }
-        const response = await Proxies.findByPk(id);
-        let exist = {exist: false};
-        if (response !== null) {
-            exist = {exist: true}
-        }
-
-        return exist;
-    }
-
     public static async getAllProxyMappings(logger: JsonConsoleLogger): Promise<ProxyDomain[]> {
-        await Proxies.sync();
+        sequelize.addModels([Proxies]);
+        Proxies.sync()
+            .then(() => logger.log({message: 'namespaces sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
         const arr: ProxyDomain[] = [];
         try {
             const process: any = await Proxies.findAll({
@@ -155,5 +135,32 @@ export class ProxyHandler {
             .then(() => logger.log({message: 'users sync success ', tag: 'sync'}))
             .error((e) => logger.logError({message: e, tag: "sync"}));
         return arr;
+    }
+
+    /**
+     * check if proxy exist by ID
+     * @param  {string} id  uuid v4 format
+     * @return {any}
+     */
+    public async existById(id: string): Promise<any> {
+        if (!validator.isUUID(id)) {
+            throw new InputValidationException('Invalid ID');
+        }
+        const response = await Proxies.findByPk(id);
+        let exist = {status: 'empty'};
+        if (response !== null) {
+            const method = await Methods.findByPk(id);
+            exist = (method!.endpointUrl !== response.endpointUrl) ||
+            (method!.method !== response.method) ||
+            (method!.denyUpload !== response.denyUpload) ||
+            (method!.limit !== response.limit) ||
+            (method!.authType !== response.authType) ||
+            (method!.timeout !== response.timeout) ||
+            (method!.integrationType !== response.integrationType) ||
+            (method!.mockResponseBody !== response.mockResponseBody) ||
+            (+method!.mockResponseCode !== response.mockResponseCode) ||
+            (method!.mockResponseContent !== response.mockResponseContent) ? {status: 'pending'} : {status: 'valid'};
+        }
+        return exist;
     }
 }

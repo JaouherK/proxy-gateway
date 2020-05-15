@@ -2,33 +2,7 @@ import {config} from "../config/config";
 
 const chalk = require('chalk');
 
-class JsonConsoleLogger {
-
-    private static prepareMessage(data: any, type: string) {
-        const t: any = {};
-        if (config.timestamp) {
-            t.timestamp = new Date().getTime();
-        }
-        let v = Object.assign(t, data);
-        if (!config.colorsOutput) {
-            return JSON.stringify(v);
-        } else {
-            let color;
-            switch (type) {
-                case "success":
-                    color = chalk.bold.green;
-                    break;
-                case "warn":
-                    color = chalk.keyword('orange');
-                    break;
-                case "error":
-                    color = chalk.bold.red;
-                    break;
-            }
-
-            return color(JSON.stringify(v));
-        }
-    }
+export class JsonConsoleLogger {
 
     /**
      * Log normal message
@@ -58,7 +32,31 @@ class JsonConsoleLogger {
         // could add here a notification middleware
         console.log(JsonConsoleLogger.prepareMessage(data, "error"));
     }
-}
 
-export {JsonConsoleLogger};
+    private static prepareMessage(data: any, type: string) {
+        const t: any = {};
+        if (config.timestamp) {
+            t.timestamp = new Date().getTime();
+        }
+        const v = {...t, ...data};
+        if (!config.colorsOutput) {
+            return JSON.stringify(v);
+        }
+        let color;
+        switch (type) {
+            case "success":
+                color = chalk.bold.green;
+                break;
+            case "warn":
+                color = chalk.keyword('orange');
+                break;
+            case "error":
+                color = chalk.bold.red;
+                break;
+        }
+
+        return color(JSON.stringify(v));
+    }
+
+}
 

@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
-import {JsonConsoleLogger} from '../logger/jsonConsoleLogger';
 import {HttpResponseCodes} from "../const/HttpResponseCodes";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 
 class GlobalErrorsMiddleware {
 

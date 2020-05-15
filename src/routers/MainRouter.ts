@@ -1,12 +1,13 @@
 import {ManagerRouter} from "./ManagerRouter";
 import {ProxyRouter} from "./ProxyRouter";
-import {JsonConsoleLogger} from "../logger/jsonConsoleLogger";
 import {HttpResponseCodes} from "../const/HttpResponseCodes";
 import {ProxyHandler} from "../handlers/ProxyHandler";
 import {ProxyDomain} from "../domains/ProxyDomain";
 import {AuthenticationRouter} from "./AuthenticationRouter";
 import {checkJwtMiddleware} from "../middlewares/CheckJwtMiddleware";
 import {checkRoleMiddleware} from "../middlewares/CheckRoleMiddleware";
+import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
+
 
 export class MainRouter {
 

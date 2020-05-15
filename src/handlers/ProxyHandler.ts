@@ -10,6 +10,7 @@ import {Keys} from "../models/Keys";
 import {User} from "../models/User";
 import {Proxies} from "../models/Proxies";
 import {sequelize} from "../sequelize";
+import {Configurations} from "../models/Configurations";
 
 export class ProxyHandler {
 
@@ -115,7 +116,10 @@ export class ProxyHandler {
         } catch (e) {
             logger.logError({message: e, tag: "sync"});
         }
-
+        sequelize.addModels([Configurations]);
+        Configurations.sync()
+            .then(() => logger.log({message: 'configurations sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
         Namespaces.sync()
             .then(() => logger.log({message: 'namespaces sync success ', tag: 'sync'}))
             .error((e) => logger.logError({message: e, tag: "sync"}));

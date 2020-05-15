@@ -4,6 +4,7 @@ import {config} from "../config/config";
 /************* Helmet config **********************/
 /* more details: https://helmetjs.github.io/docs/ */
 let HelmetMiddleware: any[] = [];
+// @ts-ignore
 if (config.enableHelmet) {
     HelmetMiddleware = [
         // Initialize helmet includes X-XSS-Protection, X-DNS-Prefetch-Control,

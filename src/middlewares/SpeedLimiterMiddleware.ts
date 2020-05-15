@@ -2,7 +2,6 @@ import {Request, Response} from "express";
 import {JsonConsoleLogger} from "../logger/jsonConsoleLogger";
 import {config} from "../config/config";
 
-
 /******************* Slow down Logic ****************************/
 /* more details https://www.npmjs.com/package/express-slow-down */
 

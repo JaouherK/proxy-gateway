@@ -56,7 +56,6 @@ export class JsonConsoleLogger {
         }
 
         return color(JSON.stringify(v));
-
     }
 
 }

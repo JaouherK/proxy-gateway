@@ -1,6 +1,30 @@
-import {PrimaryKey, Column, CreatedAt, Model, Table, UpdatedAt, ForeignKey, BelongsTo, HasMany} from "sequelize-typescript";
+import {BelongsTo, Column, CreatedAt, ForeignKey, HasMany, Model, PrimaryKey, Table, UpdatedAt} from "sequelize-typescript";
 import {Namespaces} from "./Namespaces";
 import {Methods} from "./Methods";
+
+/**
+ * @swagger
+ *  components:
+ *    schemas:
+ *      Resources:
+ *        type: object
+ *        required:
+ *          - namespacesId
+ *        properties:
+ *          namespacesId:
+ *            type: string
+ *            description: ID of Base route of the whole.
+ *          resourcesId:
+ *            type: string
+ *            description: Possible ID value of parent resource, null if first element.
+ *          path:
+ *            type: string
+ *            description: Path of the route.
+ *        example:
+ *           namespacesId: 21249527-5051-4308-a747-298ebcf3f8d5
+ *           resourcesId: null
+ *           path: element
+ */
 
 @Table
 export class Resources extends Model<Resources> {

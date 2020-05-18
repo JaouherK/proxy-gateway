@@ -7,6 +7,7 @@ import {UsersRouter} from "./Manager/UsersRouter";
 import {ApiKeysRouter} from "./Manager/ApiKeysRouter";
 import {ConsumersRouter} from './Manager/ConsumersRouter';
 import {ConfigRouter} from "./Manager/ConfigRouter";
+import {SwaggerDocsRouter} from "./SwaggerDocsRouter";
 
 const router: Router = Router();
 
@@ -19,5 +20,8 @@ router.use('/users', UsersRouter);
 router.use('/keys', ApiKeysRouter);
 router.use('/consumers', ConsumersRouter);
 router.use('/config', ConfigRouter);
+
+// Docs endpoint
+router.use("/docs", SwaggerDocsRouter);
 
 export const ManagerRouter: Router = router;

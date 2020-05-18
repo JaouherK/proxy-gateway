@@ -69,11 +69,13 @@
     "reflect-metadata": "^0.1.13",
     "sequelize": "^5.15.1",
     "sequelize-typescript": "^0.6.6-beta.1",
+    "snyk": "^1.316.1",
+    "swagger-jsdoc": "^4.0.0",
     "swagger-parser": "^8.0.3",
+    "swagger-ui-express": "^4.1.4",
     "typescript": "^3.6.4",
     "uuid": "^3.2.1",
-    "uuid-v4": "^0.1",
-    "snyk": "^1.316.1"
+    "uuid-v4": "^0.1"
   },
   "devDependencies": {
     "@types/ejs": "^2.6.0",

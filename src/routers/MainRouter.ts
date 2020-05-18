@@ -8,7 +8,6 @@ import {checkJwtMiddleware} from "../middlewares/CheckJwtMiddleware";
 import {checkRoleMiddleware} from "../middlewares/CheckRoleMiddleware";
 import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 
-
 export class MainRouter {
 
     static init(app: any, logger: JsonConsoleLogger) {

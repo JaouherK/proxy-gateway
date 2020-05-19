@@ -1,6 +1,64 @@
-import {PrimaryKey, Column, CreatedAt, Model, Table, UpdatedAt, ForeignKey} from "sequelize-typescript";
+import {Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt} from "sequelize-typescript";
 import {Consumers} from "./Consumers";
 
+/**
+ * @swagger
+ *  components:
+ *    schemas:
+ *      Keys:
+ *        type: object
+ *        required:
+ *          - keyHash
+ *          - keyPrefix
+ *          - name
+ *          - throttling
+ *          - throttlingRate
+ *          - throttlingBurst
+ *          - quota
+ *          - quotaRate
+ *          - quotaPeriod
+ *          - activeFrom
+ *          - activeTo
+ *          - active
+ *          - consumerId
+ *        properties:
+ *          keyHash:
+ *            type: string
+ *            description: key Hash.
+ *          keyPrefix:
+ *            type: string
+ *            description: Key prefix to help identify keys.
+ *          name:
+ *            type: string
+ *            description: visual name for keys.
+ *          throttling:
+ *            type: boolean
+ *            description: throttling is active or not.
+ *          throttlingRate:
+ *            type: number
+ *            description: throttling rate.
+ *          throttlingBurst:
+ *            type: number
+ *            description: throttling allowed burst.
+ *          quota:
+ *            type: boolean
+ *            description: quota is active or not.
+ *          quotaRate:
+ *            type: number
+ *            description: quota rate.
+ *          quotaPeriod:
+ *            type: number
+ *            description: quota allowed period.
+ *          activeFrom:
+ *            type: string
+ *            description: Date time for active from.
+ *          activeTo:
+ *            type: string
+ *            description: Date time for active from.
+ *          active:
+ *            type: boolean
+ *            description: Key is active or not.
+ */
 @Table
 export class Keys extends Model<Keys> {
 

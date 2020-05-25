@@ -6,14 +6,14 @@ const defaultConfig = {
     isDevelopment: process.env.IS_DEVELOPMENT === 'true',
 
     // CORS config
-    allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, '*'),
+    allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, 'localhost'),
     allowedHeaders: getParamByDefault(
         process.env.ALLOWED_HEADERS,
         ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"]
     ),
     credentials: getParamByDefault(process.env.CORS_CREDENTIALS, true),
     methods: getParamByDefault(process.env.ALLOWED_MOTHODS, "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE"),
-    preflightContinue: getParamByDefault(process.env.PREFLIGHT_CONTINUE, false),
+    preflightContinue: getParamByDefault(process.env.PREFLIGHT_CONTINUE, true),
 
     // for Sequelize to connect to db
     dialect: getParamByDefault(process.env.DB_TYPE, "mysql"),

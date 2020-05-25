@@ -35,7 +35,7 @@ export class UserHandler {
 
             this.logger.log({managing_route: req.url, payload: req.body, response: users, tag: "manager"});
         } catch (e) {
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
             res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     }
@@ -73,7 +73,7 @@ export class UserHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     }
 
@@ -118,7 +118,7 @@ export class UserHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     }
 
@@ -138,21 +138,23 @@ export class UserHandler {
             //Get values from the body
             const {username, role} = req.body;
             let user;
-            user = await User.findByPk(id);
+            user = await User.findByPk(id, {
+                attributes: ["id", "username", "role"]
+            });
 
             if (!user) {
-                throw new NotFoundException('User not found')
+                throw new NotFoundException('User not found');
             }
-            //Validate the new values on model
+
             user.username = username;
             user.role = role;
+            user.id = id;
 
             if (!(await this.uniqueUsername(username))) {
                 throw new InputValidationException('Username already in use.');
             }
-
             //Try to safe, if fails, that means username already in use
-            await User.upsert(user);
+            await User.upsert({id, username, role});
 
             res.status(HttpResponseCodes.Created).send(user);
             this.logger.log({managing_route: req.url, payload: req.body, response: user, tag: "manager"});
@@ -165,7 +167,8 @@ export class UserHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
+            console.log(e.stack, null, 2);
         }
     }
 
@@ -183,7 +186,7 @@ export class UserHandler {
             }
             await User.destroy({where: {id}});
             const response = {delete: true};
-            res.status(HttpResponseCodes.NoContent).send(response);
+            res.status(HttpResponseCodes.Ok).send(response);
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             if (e instanceof InputValidationException) {
@@ -191,7 +194,7 @@ export class UserHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     }
 
@@ -202,11 +205,11 @@ export class UserHandler {
      */
     private async uniqueUsername(username: string): Promise<boolean> {
         const counter = await User.count({where: {'username': username}});
-        return (counter === 0)
+        return (counter === 0);
     }
 
     private validate(password: string) {
-        if (password.length < 4) return false
+        if (password.length < 4) return false;
     }
 
     private hashPassword(password: string) {

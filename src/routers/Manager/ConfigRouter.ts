@@ -5,7 +5,22 @@ import {HttpResponseCodes} from "../../const/HttpResponseCodes";
 const router: Router = Router();
 const logger = new JsonConsoleLogger();
 
-// restart the server in order to reconsider the new routes
+/**
+ * @swagger
+ *
+ * /config/restart:
+ *   get:
+ *     tags:
+ *     - Config
+ *     description: restart the server in order to reconsider the new routes
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Restart successful
+ *       500:
+ *         description: Unidentified error
+ */
 router.get('/restart',
     async (req: Request, res: Response) => {
         try {
@@ -19,9 +34,10 @@ router.get('/restart',
             process.kill(process.pid);
         } catch (e) {
             logger.logError({
-                message: e
+                message: e.message,
+                stack: e.stack,
             });
-            res.sendStatus(HttpResponseCodes.NotFound);
+            res.sendStatus(HttpResponseCodes.InternalServerError);
         }
     });
 

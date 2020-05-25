@@ -4,7 +4,7 @@ import {Column, CreatedAt, IsUUID, Model, NotEmpty, PrimaryKey, Table, Unique, U
  * @swagger
  *  components:
  *    schemas:
- *      User:
+ *      Users:
  *        type: object
  *        required:
  *          - username
@@ -19,8 +19,8 @@ import {Column, CreatedAt, IsUUID, Model, NotEmpty, PrimaryKey, Table, Unique, U
  *            type: string
  *            description: Role for the user.
  *        example:
- *           name: Alexander
- *           email: p@ssw0rd
+ *           username: Alexander
+ *           password: p@ssw0rd
  *           role: admin
  */
 

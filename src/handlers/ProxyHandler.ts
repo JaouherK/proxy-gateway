@@ -10,6 +10,7 @@ import {Keys} from "../models/Keys";
 import {User} from "../models/User";
 import {Proxies} from "../models/Proxies";
 import {sequelize} from "../sequelize";
+import {NotFoundException} from "../exceptions/NotFoundException";
 
 export class ProxyHandler {
 
@@ -160,6 +161,8 @@ export class ProxyHandler {
             (method!.mockResponseBody !== response.mockResponseBody) ||
             (+method!.mockResponseCode !== response.mockResponseCode) ||
             (method!.mockResponseContent !== response.mockResponseContent) ? {status: 'pending'} : {status: 'valid'};
+        } else {
+            throw new NotFoundException('Proxy does not exist!');
         }
         return exist;
     }

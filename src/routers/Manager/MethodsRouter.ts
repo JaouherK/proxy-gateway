@@ -9,7 +9,26 @@ const router: Router = Router();
 const logger = new JsonConsoleLogger();
 const methodsHandler = new MethodsHandler();
 
-// get all dynamic methods
+/**
+ * @swagger
+ *
+ * /methods:
+ *   get:
+ *     tags:
+ *     - Methods
+ *     description: Get list of all methods with parent resource
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Fetched listing of all methods
+ *         schema:
+ *           type: "array"
+ *           items:
+ *             $ref: "#/components/schemas/Methods"
+ *       500:
+ *         description: Unidentified error
+ */
 router.get('/',
     async (req: Request, res: Response) => {
         try {
@@ -18,12 +37,35 @@ router.get('/',
 
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
             res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
-// delete a method
+/**
+ * @swagger
+ *
+ * /methods/{methodId}:
+ *   delete:
+ *     tags:
+ *     - Methods
+ *     description: Delete of method by ID
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: methodId
+ *         description: Id of method.
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: deleted method
+ *       409:
+ *         description: Invalid UUID provided
+ *       500:
+ *         description: Unidentified error
+ */
 router.delete('/:api',
     async (req: Request, res: Response) => {
         try {
@@ -38,11 +80,33 @@ router.delete('/:api',
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     });
 
-// create or update endpoints
+/**
+ * @swagger
+ *
+ * /methods:
+ *   post:
+ *     tags:
+ *     - Methods
+ *     description: Create or update a method
+ *     requestBody:
+ *       description: A method object
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/Methods"
+ *     responses:
+ *       200:
+ *         description: Valid response
+ *       409:
+ *         description: Invalid UUID provided
+ *       500:
+ *         description: Unidentified error
+ */
 router.post('/',
     async (req: Request, res: Response) => {
         try {
@@ -58,12 +122,39 @@ router.post('/',
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     });
 
 
-// get a method by id
+/**
+ * @swagger
+ *
+ * /methods/{methodId}:
+ *   get:
+ *     tags:
+ *     - Methods
+ *     description: Get a method details by id with parent resource
+ *     parameters:
+ *       - name: methodId
+ *         description: Id of method.
+ *         in: path
+ *         required: true
+ *         type: string
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Get a method details
+ *         schema:
+ *           $ref: "#/components/schemas/Methods"
+ *       409:
+ *         description: Invalid UUID provided
+ *       404:
+ *         description: UUID does not exist
+ *       500:
+ *         description: unidentified error
+ */
 router.get('/:api',
     async (req: Request, res: Response) => {
         try {
@@ -80,7 +171,7 @@ router.get('/:api',
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     });
 

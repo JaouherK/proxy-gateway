@@ -58,6 +58,12 @@ import {Consumers} from "./Consumers";
  *          active:
  *            type: boolean
  *            description: Key is active or not.
+ *          consumerId:
+ *            type: string
+ *            description: Consumer ID.
+ *        example:
+ *          consumerId: 749104b8-cb0a-4222-b009-bbe3274a8a71
+ *          name: a name
  */
 @Table
 export class Keys extends Model<Keys> {

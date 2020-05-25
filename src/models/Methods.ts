@@ -79,9 +79,9 @@ import {Resources} from "./Resources";
  *          limit: 1mb
  *          integrationType: MOCK
  *          forwardedMethod: GET
- *          endpointUrl:
+ *          endpointUrl: ""
  *          endpointProtocol: https
- *          mockResponseBody: {"description": "Sample Namespace"}
+ *          mockResponseBody: "{}"
  *          mockResponseCode: 200
  *          mockResponseContent: application/json
  */

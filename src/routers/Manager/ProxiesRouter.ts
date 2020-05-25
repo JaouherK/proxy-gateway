@@ -9,20 +9,72 @@ const router: Router = Router();
 const logger = new JsonConsoleLogger();
 const proxyHandler = new ProxyHandler();
 
-// save routes to proxy data
+/**
+ * @swagger
+ *
+ * /proxies/save:
+ *   post:
+ *     tags:
+ *     - Proxies
+ *     description: save routes to proxy data
+ *     requestBody:
+ *       description: List of Proxy object
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: "array"
+ *             items:
+ *               $ref: "#/components/schemas/Proxies"
+ *     responses:
+ *       200:
+ *         description: valid response
+ *       409:
+ *         description: Invalid UUID provided
+ *       500:
+ *         description: unidentified error
+ */
 router.post('/save',
     async (req: Request, res: Response) => {
         try {
+            console.log(req.body, null, 2);
             const response = await proxyHandler.saveRoutes(req.body);
             res.send(response);
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
             res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     });
 
-// get all proxies of a namespace
+/**
+ * @swagger
+ *
+ * /proxies/{namespaceId}:
+ *   get:
+ *     tags:
+ *     - Proxies
+ *     description: get all proxies of a namespace
+ *     parameters:
+ *       - name: namespaceId
+ *         description: Id of namespace.
+ *         in: path
+ *         required: true
+ *         type: string
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: valid response
+ *         schema:
+ *           type: "array"
+ *           items:
+ *             $ref: "#/components/schemas/Proxies"
+ *       409:
+ *         description: Invalid UUID provided
+ *       500:
+ *         description: unidentified error
+ */
 router.get('/:namespace',
     async (req: Request, res: Response) => {
         try {
@@ -36,11 +88,28 @@ router.get('/:namespace',
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     });
 
-// get all proxies
+/**
+ * @swagger
+ *
+ * /proxies:
+ *   get:
+ *     tags:
+ *     - Proxies
+ *     description: get list of all proxies
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: fetched listing of all proxies
+ *         schema:
+ *           type: "array"
+ *           items:
+ *             $ref: "#/components/schemas/Proxies"
+ */
 router.get('/',
     async (req: Request, res: Response) => {
         try {
@@ -48,12 +117,33 @@ router.get('/',
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
             res.send(response);
         } catch (e) {
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
             res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     });
 
-// delete a proxy by ID
+/**
+ * @swagger
+ *
+ * /proxies/{proxyId}:
+ *   delete:
+ *     tags:
+ *     - Proxies
+ *     description: Delete a proxy by ID
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: proxyId
+ *         description: Id of proxy.
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: deleted proxy
+ *       409:
+ *         description: Invalid UUID provided
+ */
 router.delete('/:proxyId',
     async (req: Request, res: Response) => {
         try {
@@ -68,11 +158,36 @@ router.delete('/:proxyId',
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     });
 
-// check if a proxy exists by id
+/**
+ * @swagger
+ *
+ * /proxies/exist/{proxyId}:
+ *   get:
+ *     tags:
+ *     - Proxies
+ *     description: check if a proxy exists by id
+ *     parameters:
+ *       - name: proxyId
+ *         description: Id of proxy.
+ *         in: path
+ *         required: true
+ *         type: string
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: true/false response
+ *       409:
+ *         description: Invalid UUID provided
+ *       404:
+ *         description: UUID does not exist
+ *       500:
+ *         description: unidentified error
+ */
 router.get('/exist/:proxyId',
     async (req: Request, res: Response) => {
         try {
@@ -88,7 +203,7 @@ router.get('/exist/:proxyId',
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            logger.logError({message: e, tag: "manager"});
+            logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     });
 

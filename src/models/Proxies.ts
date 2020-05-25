@@ -41,7 +41,7 @@ import {Column, CreatedAt, DataType, Model, PrimaryKey, Table, UpdatedAt} from "
  *            type: boolean
  *            description: accept or deny file upload
  *          limit:
- *            type: string
+ *            type: number
  *            description: limit of parsed json
  *          authType:
  *            type: string
@@ -56,7 +56,7 @@ import {Column, CreatedAt, DataType, Model, PrimaryKey, Table, UpdatedAt} from "
  *            type: string
  *            description: mocked body of response
  *          mockResponseCode:
- *            type: string
+ *            type: number
  *            description: mocked http code of response
  *          mockResponseContent:
  *            type: string

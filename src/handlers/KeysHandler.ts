@@ -49,7 +49,7 @@ export class KeysHandler {
 
             this.logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});
         } catch (e) {
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
             res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
         }
     }
@@ -76,7 +76,7 @@ export class KeysHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     }
 
@@ -129,7 +129,7 @@ export class KeysHandler {
             apiData.quotaPeriod = (apiData.quotaPeriod !== undefined) ? apiData.quotaPeriod : 0;
             apiData.activeFrom = (apiData.activeFrom !== undefined) ? apiData.activeFrom : new Date();
             apiData.activePeriod = (apiData.activePeriod !== undefined) ? apiData.activePeriod : 10;
-            const newDate = new Date().setFullYear(apiData.activeFrom.getFullYear() + 10);
+            const newDate = new Date().setFullYear(apiData.activeFrom.getFullYear() + apiData.activePeriod);
             apiData.activeTo = (apiData.activeTo !== undefined) ? apiData.activeTo : newDate;
             apiData.active = (apiData.active !== undefined) ? apiData.active : true;
 
@@ -138,7 +138,7 @@ export class KeysHandler {
             if (response === null) {
                 throw new NotFoundException("API Key not found");
             } else {
-                res.send({response, apiKey});
+                res.send({...response.toJSON(), ...{apiKey}});
                 this.logger.log({managing_route: req.url, payload, response, tag: "manager"});
             }
         } catch (e) {
@@ -149,7 +149,7 @@ export class KeysHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     }
 
@@ -196,7 +196,7 @@ export class KeysHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     }
 
@@ -251,7 +251,7 @@ export class KeysHandler {
             } else {
                 res.status(HttpResponseCodes.InternalServerError).send({error: e.message});
             }
-            this.logger.logError({message: e, tag: "manager"});
+            this.logger.logError({message: e.message, stack: e.stack, tag: "manager"});
         }
     }
 

@@ -10,6 +10,9 @@ import {Keys} from "../models/Keys";
 import {User} from "../models/User";
 import {Proxies} from "../models/Proxies";
 import {sequelize} from "../sequelize";
+import {Strategies} from "../models/Strategies";
+import {Features} from "../models/Features";
+import {FeaturesStrategies} from "../models/FeaturesStrategies";
 
 export class ProxyHandler {
 
@@ -133,6 +136,15 @@ export class ProxyHandler {
             .error((e) => logger.logError({message: e, tag: "sync"}));
         User.sync()
             .then(() => logger.log({message: 'users sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        Features.sync()
+            .then(() => logger.log({message: 'features sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        Strategies.sync()
+            .then(() => logger.log({message: 'strategies sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
+        FeaturesStrategies.sync()
+            .then(() => logger.log({message: 'feature-strategies association sync success ', tag: 'sync'}))
             .error((e) => logger.logError({message: e, tag: "sync"}));
         return arr;
     }

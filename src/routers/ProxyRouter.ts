@@ -4,6 +4,10 @@ import {JsonConsoleLogger} from "../logger/JsonConsoleLogger";
 import {checkJwtMiddleware} from "../middlewares/CheckJwtMiddleware";
 import proxy = require("express-http-proxy");
 
+const uuid = require('uuid-v4');
+let parameters: any[];
+let targetUrl: string;
+
 export class ProxyRouter {
 
     static getRouter(prox: ProxyDomain, logger: JsonConsoleLogger): Router {
@@ -34,22 +38,22 @@ export class ProxyRouter {
         // manage if this is a mock
         if (prox.integrationType === 'MOCK') {
             router.use((req: Request, res: Response, next) => {
-                if (prox.method.toLowerCase() !== req.method.toLowerCase()) {
+                const uri = req.originalUrl.split('?')[0];
+                const url = this.buildFromProxy(prox.url, uri);
+                if (
+                    (prox.method.toLowerCase() !== req.method.toLowerCase())
+                    || (req.originalUrl !== url)
+                ) {
                     return next();
                 }
-
-                if (req.method === prox.method) {
-                    logger.log({
-                        message: '(' + req.method + ')' + prox.url + ' (mocked route) requested' + logAuth,
-                        body: req.body,
-                        response: JSON.parse(prox.mockResponseBody),
-                        tag: prox.namespace
-                    });
-                    res.setHeader('Content-Type', prox.mockResponseContent);
-                    res.status(prox.mockResponseCode).send(prox.mockResponseBody);
-                } else {
-                    next();
-                }
+                logger.log({
+                    message: '(' + req.method + ')' + prox.url + req.url + ' (mocked route) requested' + logAuth,
+                    body: req.body,
+                    response: JSON.parse(prox.mockResponseBody),
+                    tag: prox.namespace
+                });
+                res.setHeader('Content-Type', prox.mockResponseContent);
+                res.status(prox.mockResponseCode).send(prox.mockResponseBody);
             });
         }
 
@@ -63,24 +67,50 @@ export class ProxyRouter {
                 timeout: prox.timeout,
                 memoizeHost: false,
 
+                filter: (req: Request, res: Response) => {
+                    const uri = req.originalUrl.split('?')[0];
+                    const url = this.buildFromProxy(prox.url, uri);
+                    const endUrl = this.buildUrl(url.split('/'), req.originalUrl.split('?')[1]);
+                    this.getParams(prox.url, uri);
+
+                    return (
+                        (req.method === prox.method) &&
+                        (endUrl === req.originalUrl)
+                    );
+                },
+
+                proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+                    const correlationId = (srcReq.headers['x-correlation-id']) ?
+                        srcReq.headers['x-correlation-id'] as string : uuid();
+                    // you can update headers
+                    if (proxyReqOpts.headers) {
+                        proxyReqOpts.headers['x-correlation-id'] = correlationId;
+                        srcReq.headers['x-correlation-id'] = correlationId;
+                    }
+
+                    return proxyReqOpts;
+                },
+
                 proxyReqPathResolver: (req: Request) => {
+
                     const route = prox.endpointUrl.split('/');
-                    const params = req.params[0].slice(1).split('/');
                     const queryString = req.url.split('?')[1];
 
                     const prefix = prox.https ? 'https://' : 'http://';
-                    const endPoint = this.buildUrl(this.paramsResolver(route, params), queryString);
-
-                    return prefix + endPoint;
-                },
-
-                filter(req: Request) {
-                    return req.method === prox.method;
+                    const endPoint = this.buildUrl(this.paramsResolver(route), queryString);
+                    targetUrl = prefix + endPoint;
+                    return targetUrl;
                 },
 
                 // this is mostly for logging reasons (can be used to decorate the data response)
                 userResDecorator(proxyRes, proxyResData, userReq) {
-                    const data = {data: proxyResData.toString('utf8')};
+                    let response: any;
+                    try {
+                        response = JSON.parse(proxyResData.toString('utf8'));
+                    } catch (e) {
+                        response = {};
+                    }
+                    const data = {data: response};
                     logger.log({
                         message: '(' + userReq.method + ')' + userReq.originalUrl + ' requested' + logAuth + ' routed to ' + prox.endpointUrl,
                         body: userReq.body,
@@ -96,11 +126,11 @@ export class ProxyRouter {
 
     // resolve route that are expecting parameters with incoming params
     // this will through extra parameters that are not mapped in target
-    private static paramsResolver(route: string[], params: string[]): string [] {
+    private static paramsResolver(route: string[]): string [] {
         return route.map((element) => {
             // regex test that starts with :
             if (/^:/.test(element)) {
-                const smallShift = params.shift();
+                const smallShift = parameters.shift();
                 if (smallShift !== undefined) {
                     element = smallShift;
                 }
@@ -116,5 +146,34 @@ export class ProxyRouter {
         } else {
             return route.join('/');
         }
+    }
+
+    private static buildFromProxy(proxyUri: string, reqUri: string): string {
+        // if (/^*:*/.test(proxyUri)) {
+        if (proxyUri.indexOf(':') === -1) {
+            return proxyUri;
+        }
+        const p = proxyUri.split('/');
+        const r = reqUri.split('/');
+        p.map((element, key) => {
+            if ((/^:/.test(element)) && (typeof r[key] !== undefined)) {
+                p[key] = r[key];
+            }
+        });
+        return p.join('/');
+    }
+
+    private static getParams(proxyUri: string, reqUri: string) {
+        if (proxyUri.indexOf(':') === -1) {
+            return;
+        }
+        parameters = [];
+        const p = proxyUri.split('/');
+        const r = reqUri.split('/');
+        p.map((element, key) => {
+            if ((/^:/.test(element)) && (typeof r[key] !== undefined)) {
+                parameters.push(r[key]);
+            }
+        });
     }
 }

@@ -42,6 +42,7 @@ export class MethodsDomains {
     mockResponseCode: number;
     mockResponseContent: string;
     active: boolean;
+    hiddenFields?: string;
 
 
     constructor(
@@ -61,7 +62,8 @@ export class MethodsDomains {
         mockResponseBody?: string,
         mockResponseCode?: number,
         mockResponseContent?: string,
-        active?: boolean
+        active?: boolean,
+        hiddenFields = ''
     ) {
         this.resourcesId = resourcesId;
         const uuid = require('uuid-v4');
@@ -82,6 +84,6 @@ export class MethodsDomains {
         this.mockResponseCode = (mockResponseCode !== undefined) ? mockResponseCode : HttpResponseCodes.Ok;
         this.mockResponseContent = (mockResponseContent !== undefined) ? mockResponseContent : SupportedContentTypes.json;
         this.active = (active !== undefined) ? active : true;
+        this.hiddenFields = hiddenFields;
     }
-
 }

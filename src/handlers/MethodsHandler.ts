@@ -4,6 +4,7 @@ import {MethodsDomains, SupportedContentTypes, SupportedMethods} from "../domain
 import {InputValidationException} from "../exceptions/InputValidationException";
 import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from "validator";
+import {HttpResponseCodes} from "../const/HttpResponseCodes";
 
 const {Op} = require("sequelize");
 
@@ -63,7 +64,7 @@ export class MethodsHandler {
                 throw new InputValidationException('Invalid JSON mocked response');
             }
             apiData.mockResponseBody = (apiData.mockResponseBody !== '') ? apiData.mockResponseBody : '{}';
-            apiData.mockResponseCode = (apiData.mockResponseCode !== '') ? apiData.mockResponseCode : 200;
+            apiData.mockResponseCode = (apiData.mockResponseCode !== '') ? apiData.mockResponseCode : HttpResponseCodes.Ok;
             apiData.mockResponseContent = (apiData.mockResponseContent !== '') ?
                 apiData.mockResponseContent : SupportedContentTypes.json;
         }
@@ -73,6 +74,8 @@ export class MethodsHandler {
                 throw new InputValidationException('Invalid endpoint URL ' + url);
             }
         }
+
+        apiData.hiddenFields = (Array.isArray(apiData.hiddenFields)) ? apiData.hiddenFields.toString() : '';
 
         await Methods.upsert(
             new MethodsDomains(
@@ -93,6 +96,7 @@ export class MethodsHandler {
                 apiData.mockResponseCode,
                 apiData.mockResponseContent,
                 apiData.active,
+                apiData.hiddenFields
             )
         );
         const response = await Methods.findByPk(apiData.id);

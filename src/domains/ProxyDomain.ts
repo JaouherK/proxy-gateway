@@ -15,6 +15,7 @@ export class ProxyDomain {
     mockResponseCode: number;
     mockResponseContent: string;
     order: number;
+    hiddenFields?: string;
 
     constructor(
         id: string,
@@ -32,7 +33,8 @@ export class ProxyDomain {
         mockResponseBody: string,
         mockResponseCode: number,
         mockResponseContent: string,
-        order: number
+        order: number,
+        hiddenFields = ''
     ) {
         this.id = id;
         this.namespacesId = namespacesId;
@@ -50,5 +52,6 @@ export class ProxyDomain {
         this.mockResponseCode = mockResponseCode;
         this.mockResponseContent = mockResponseContent;
         this.order = order;
+        this.hiddenFields = hiddenFields;
     }
 }

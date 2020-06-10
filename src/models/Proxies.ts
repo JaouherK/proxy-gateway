@@ -64,6 +64,9 @@ import {Column, CreatedAt, DataType, Model, PrimaryKey, Table, UpdatedAt} from "
  *          order:
  *            type: number
  *            description: Order to be taken in consideration in proxies parsing
+ *          hiddenFields:
+ *            type: string
+ *            description: Hidden fields while logging
  *        example:
  *          namespacesId: 21249527-5051-4308-a747-298ebcf3f8d5
  *          namespace: test
@@ -130,6 +133,9 @@ export class Proxies extends Model<Proxies> {
 
     @Column
     mockResponseContent!: string;
+
+    @Column(DataType.TEXT)
+    hiddenFields!: string;
 
     @Column
     order!: number;

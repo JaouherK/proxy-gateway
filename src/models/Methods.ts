@@ -69,6 +69,9 @@ import {Resources} from "./Resources";
  *          mockResponseContent:
  *            type: string
  *            description: mocked type of response
+ *          hiddenFields:
+ *            type: string
+ *            description: hidden fields to be masked
  *        example:
  *          resourcesId: 184b58e4-2ef3-40df-a904-022e945602ee
  *          method: GET
@@ -84,6 +87,7 @@ import {Resources} from "./Resources";
  *          mockResponseBody: "{}"
  *          mockResponseCode: 200
  *          mockResponseContent: application/json
+ *          hiddenFields: "password"
  */
 
 @Table
@@ -144,6 +148,9 @@ export class Methods extends Model<Methods> {
 
     @Column
     mockResponseContent!: string;
+
+    @Column(DataType.TEXT)
+    hiddenFields!: string;
 
     @CreatedAt
     @Column

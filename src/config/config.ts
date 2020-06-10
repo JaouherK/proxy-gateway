@@ -6,7 +6,7 @@ const defaultConfig = {
     isDevelopment: process.env.IS_DEVELOPMENT === 'true',
 
     // CORS config
-    allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, 'localhost'),
+    allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, 'j.eqs.intra'),
     allowedHeaders: getParamByDefault(
         process.env.ALLOWED_HEADERS,
         ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"]

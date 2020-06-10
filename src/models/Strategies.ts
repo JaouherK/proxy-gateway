@@ -1,6 +1,19 @@
-import {BelongsToMany, Column, CreatedAt, DataType, IsUUID, Model, PrimaryKey, Table, Unique, UpdatedAt} from "sequelize-typescript";
+import {
+    BelongsToMany,
+    Column,
+    CreatedAt,
+    DataType,
+    HasMany,
+    IsUUID,
+    Model,
+    PrimaryKey,
+    Table,
+    Unique,
+    UpdatedAt
+} from "sequelize-typescript";
 import {Features} from "./Features";
 import {FeaturesStrategies} from "./FeaturesStrategies";
+import {StratOptions} from "./StratOptions";
 
 /**
  * @swagger
@@ -33,21 +46,20 @@ export class Strategies extends Model<Strategies> {
     @Unique
     @Column
     name!: string;
+
+    @Column(DataType.TEXT)
+    description!: string;
+
     @BelongsToMany(() => Features, () => FeaturesStrategies, "strategies_id", "features_id")
     features!: Features[];
+
+    @HasMany(() => StratOptions)
+    options!: StratOptions[];
+
     @CreatedAt
     @Column
     createdAt!: Date;
     @UpdatedAt
     @Column
     updatedAt!: Date;
-
-    @Column(DataType.TEXT)
-    get parameters(): string {
-        return JSON.parse(this.getDataValue('parameters'));
-    }
-
-    set parameters(value: string) {
-        this.setDataValue('parameters', value);
-    }
 }

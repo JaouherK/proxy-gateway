@@ -39,7 +39,7 @@ export class ResourcesHandler {
      * @param url
      */
     public async addOrUpdate(apiData: any, url: string): Promise<any> {
-        apiData.path = validator.whitelist(apiData.path, 'a-zA-Z0-9-_');
+        apiData.path = validator.whitelist(apiData.path, 'a-zA-Z0-9-_:');
         if (!validator.isUUID(apiData.namespacesId)) {
             throw new InputValidationException('Invalid namespace ID: ' + url);
         }

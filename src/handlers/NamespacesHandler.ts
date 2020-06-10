@@ -18,7 +18,7 @@ export class NamespacesHandler {
      * @return {any}
      */
     public async getAll(): Promise<any> {
-        return Namespaces.findAll();
+        return Namespaces.findAll({order: ['route']});
     }
 
     public async deleteOne(id: string, url: string): Promise<any> {

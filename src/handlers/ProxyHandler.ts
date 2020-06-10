@@ -13,6 +13,7 @@ import {sequelize} from "../sequelize";
 import {Strategies} from "../models/Strategies";
 import {Features} from "../models/Features";
 import {FeaturesStrategies} from "../models/FeaturesStrategies";
+import {StratOptions} from "../models/StratOptions";
 
 export class ProxyHandler {
 
@@ -110,7 +111,8 @@ export class ProxyHandler {
                     value.mockResponseBody,
                     value.mockResponseCode,
                     value.mockResponseContent,
-                    value.order
+                    value.order,
+                    value.hiddenFields
                 );
                 arr.push(aux);
             });
@@ -146,6 +148,9 @@ export class ProxyHandler {
         FeaturesStrategies.sync()
             .then(() => logger.log({message: 'feature-strategies association sync success ', tag: 'sync'}))
             .error((e) => logger.logError({message: e, tag: "sync"}));
+        StratOptions.sync()
+            .then(() => logger.log({message: 'strategy-options sync success ', tag: 'sync'}))
+            .error((e) => logger.logError({message: e, tag: "sync"}));
         return arr;
     }
 
@@ -169,6 +174,7 @@ export class ProxyHandler {
             (method!.authType !== response.authType) ||
             (method!.timeout !== response.timeout) ||
             (method!.integrationType !== response.integrationType) ||
+            (method!.hiddenFields !== response.hiddenFields) ||
             (method!.mockResponseBody !== response.mockResponseBody) ||
             (+method!.mockResponseCode !== response.mockResponseCode) ||
             (method!.mockResponseContent !== response.mockResponseContent) ? {status: 'pending'} : {status: 'valid'};

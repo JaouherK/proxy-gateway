@@ -32,7 +32,6 @@ import {StratOptions} from "./StratOptions";
  *            description: List of parameters
  *        example:
  *           name: default
- *           parameters: {}
  */
 
 @Table

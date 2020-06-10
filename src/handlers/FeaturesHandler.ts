@@ -14,9 +14,16 @@ export class FeaturesHandler {
     public async getAll(): Promise<any> {
         return Features.findAll(
             {
-                include: [{model: Strategies, attributes: ['id', 'name', 'parameters'], through: {attributes: []}}],
-                attributes: ['id', 'name', 'description', 'description', 'enabled']
-            });
+                include: [
+                    {
+                        model: Strategies,
+                        attributes: ['id', 'name', 'description'],
+                        through: {attributes: ["parameters"]}
+                    }
+                ],
+                attributes: ['id', 'name', 'description', 'enabled']
+            }
+        );
     }
 
     public async deleteOne(id: string, url: string): Promise<any> {
@@ -69,9 +76,18 @@ export class FeaturesHandler {
         if (!validator.isUUID(id)) {
             throw new InputValidationException('Invalid ID: ' + url);
         }
-        const response = await Features.findByPk(id, {
-            include: [Strategies]
-        });
+        const response = await Features.findByPk(id,
+            {
+                include: [
+                    {
+                        model: Strategies,
+                        attributes: ['id', 'name', 'description'],
+                        through: {attributes: ["parameters"]}
+                    }
+                ],
+                attributes: ['id', 'name', 'description', 'enabled']
+            }
+        );
         if (response === null) {
             throw new NotFoundException("Strategy not found");
         }

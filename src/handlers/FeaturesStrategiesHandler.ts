@@ -32,10 +32,17 @@ export class FeaturesStrategiesHandler {
         const response = await Features.findByPk(
             apiData.features_id,
             {
-                include: [{model: Strategies, attributes: ['id', 'name', 'parameters'], through: {attributes: []}}],
-                attributes: ['id', 'name', 'description', 'description', 'enabled']
+                include: [
+                    {
+                        model: Strategies,
+                        attributes: ['id', 'name', 'description'],
+                        through: {attributes: ["parameters"]}
+                    }
+                ],
+                attributes: ['id', 'name', 'description', 'enabled']
             }
         );
+
         if (response === null) {
             throw new NotFoundException("An error occurred. Strategy not found");
         }

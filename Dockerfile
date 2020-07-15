@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:lts-alpine3.9
 
 ENV NODE_ENV production
 ENV PORT 3000

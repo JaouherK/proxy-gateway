@@ -56,73 +56,14 @@ export class NamespacesHandler {
     }
 
     /**
-     * add/update namespace
-     * @return {any}
-     * @param apiData
-     * @param url
+     * check if a route is unique to avoid duplicate
+     * @access  private
+     * @param  {string} route
+     * @return {boolean}
      */
-    public async addOrUpdate(apiData: any, url: string): Promise<any> {
-
-        const isUpdate = apiData.hasOwnProperty("id");
-
-        apiData.route = validator.whitelist(apiData.route, 'a-zA-Z0-9-_');
-        if (!isUpdate) {
-            if (!(await this.uniqueRoute(apiData.route))) {
-                throw new InputValidationException('Namespace already exists');
-            }
-            const uuid = require('uuid-v4');
-            apiData.id = uuid();
-        }
-
-        if (!validator.isUUID(apiData.id)) {
-            throw new InputValidationException('Invalid ID: ' + url);
-        }
-        if ((validator.isEmpty(apiData.route)) || (validator.contains(apiData.route, '/'))) {
-            throw new InputValidationException('Invalid namespace');
-        }
-
-        apiData.type = (apiData.type !== undefined) ? apiData.type : 'REST';
-        apiData.description = (apiData.description !== undefined) ? apiData.description : 'Sample description for ' + apiData.route;
-        apiData.active = (apiData.active !== undefined) ? apiData.active : true;
-
-        await Namespaces.upsert(apiData);
-
-        if (!isUpdate) {
-            const uuid = require('uuid-v4');
-            const resourceId = uuid();
-            await Resources.upsert(
-                new ResourcesDomain(
-                    apiData.id,
-                    resourceId
-                ));
-
-            await Methods.upsert(
-                new MethodsDomains(
-                    resourceId,
-                    undefined,
-                    'GET',
-                    'none',
-                    undefined,
-                    undefined,
-                    undefined,
-                    'MOCK',
-                    'GET',
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    '{"description": "' + apiData.description + '"}'
-                ));
-        }
-
-        const response = await Namespaces.findByPk(apiData.id, {
-            include: [Resources]
-        });
-        if (response === null) {
-            throw new NotFoundException("An error occurred. Store not found");
-        }
-
-        return response;
+    static async uniqueRoute(route: string): Promise<boolean> {
+        const counter = await Namespaces.count({where: {'route': route}});
+        return (counter === 0);
     }
 
     /**
@@ -424,13 +365,72 @@ export class NamespacesHandler {
     }
 
     /**
-     * check if a route is unique to avoid duplicate
-     * @access  private
-     * @param  {string} route
-     * @return {boolean}
+     * add/update namespace
+     * @return {any}
+     * @param apiData
+     * @param url
      */
-    private async uniqueRoute(route: string): Promise<boolean> {
-        const counter = await Namespaces.count({where: {'route': route}});
-        return (counter === 0);
+    public async addOrUpdate(apiData: any, url: string): Promise<any> {
+
+        const isUpdate = apiData.hasOwnProperty("id");
+
+        apiData.route = validator.whitelist(apiData.route, 'a-zA-Z0-9-_');
+        if (!isUpdate) {
+            if (!(await NamespacesHandler.uniqueRoute(apiData.route))) {
+                throw new InputValidationException('Namespace already exists');
+            }
+            const uuid = require('uuid-v4');
+            apiData.id = uuid();
+        }
+
+        if (!validator.isUUID(apiData.id)) {
+            throw new InputValidationException('Invalid ID: ' + url);
+        }
+        if ((validator.isEmpty(apiData.route)) || (validator.contains(apiData.route, '/'))) {
+            throw new InputValidationException('Invalid namespace');
+        }
+
+        apiData.type = (apiData.type !== undefined) ? apiData.type : 'REST';
+        apiData.description = (apiData.description !== undefined) ? apiData.description : 'Sample description for ' + apiData.route;
+        apiData.active = (apiData.active !== undefined) ? apiData.active : true;
+
+        await Namespaces.upsert(apiData);
+
+        if (!isUpdate) {
+            const uuid = require('uuid-v4');
+            const resourceId = uuid();
+            await Resources.upsert(
+                new ResourcesDomain(
+                    apiData.id,
+                    resourceId
+                ));
+
+            await Methods.upsert(
+                new MethodsDomains(
+                    resourceId,
+                    undefined,
+                    'GET',
+                    'none',
+                    undefined,
+                    undefined,
+                    undefined,
+                    'MOCK',
+                    'GET',
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    '{"description": "' + apiData.description + '"}'
+                ));
+        }
+
+        const response = await Namespaces.findByPk(apiData.id, {
+            include: [Resources]
+        });
+        if (response === null) {
+            throw new NotFoundException("An error occurred. Store not found");
+        }
+
+        return response;
     }
 }

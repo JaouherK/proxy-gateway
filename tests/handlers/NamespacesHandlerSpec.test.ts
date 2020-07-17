@@ -158,6 +158,38 @@ describe('NamespacesHandler', () => {
         expect(await spyOnNamespaceDeleteById).toHaveBeenCalled();
     });
 
+    it("Should throw Input Validation exception if not unique namespace", async () => {
+
+        const spyOnNamespaceUnique = spyOn<any>(NamespacesHandler, 'uniqueRoute');
+        spyOnNamespaceUnique.and.callFake(async () => {
+            return false;
+        });
+
+        handler.addOrUpdate({route: 'route'}, "url")
+            .then(t => {
+                expect(spyOnNamespaceUnique).toHaveBeenCalled();
+            })
+            .catch(k => {
+                expect(k instanceof InputValidationException).toBeTruthy();
+            });
+    });
+
+    it("Should throw invalid error if route is empty", async () => {
+
+        const spyOnNamespaceUnique = spyOn<any>(NamespacesHandler, 'uniqueRoute');
+        spyOnNamespaceUnique.and.callFake(async () => {
+            return true;
+        });
+
+        handler.addOrUpdate({route: '/'}, "url")
+            .then(t => {
+                expect(spyOnNamespaceUnique).toHaveBeenCalled();
+            })
+            .catch(k => {
+                expect(k instanceof InputValidationException).toBeTruthy();
+            });
+    });
+
     it('should throw Error when invalid uuid param passed', () => {
 
         handler.deleteOne('**********', 'url').then((t) => {
@@ -177,6 +209,16 @@ describe('NamespacesHandler', () => {
 
         handler.buildRoute('********', 'url').then((t) => {
             expect(t).toThrow(new InputValidationException('Invalid ID: url'));
+        }).catch(() => {
+        });
+
+        handler.addOrUpdate({id: '********', route: 'route'}, 'url').then((t) => {
+            expect(t).toThrow(new InputValidationException('Invalid ID: url'));
+        }).catch(() => {
+        });
+
+        handler.addOrUpdate({id: '00e83fdf-80af-4981-bc3e-c5bf00e688b5', route: '/'}, 'url').then((t) => {
+            expect(t).toThrow(new InputValidationException('Invalid namespace'));
         }).catch(() => {
         });
     });

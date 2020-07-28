@@ -1,7 +1,6 @@
 import {config} from "./config/config";
 import {JsonConsoleLogger} from "./logger/JsonConsoleLogger";
 
-
 const cluster = require('cluster');
 // worker array that keeps relative PIDs
 const workers: any = [];
@@ -12,6 +11,10 @@ export class ClusterConfiguration {
         if (cluster.isMaster) {
 
             // could be used later to create parameterizable number of clusters
+            for (var i = 0; i < config.clusters - 1; i++) {
+                cluster.fork();
+            }
+
             workers.push(cluster.fork());
 
             // to receive messages from worker process

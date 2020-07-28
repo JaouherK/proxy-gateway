@@ -4,6 +4,7 @@ const defaultConfig = {
     jsonLimit: '20mb',
     port: getParamByDefault(process.env.PORT, "3232"),
     isDevelopment: process.env.IS_DEVELOPMENT === 'true',
+    clusters: getParamByDefault(process.env.CLUSTER_NUMBER, 1),
 
     // CORS config
     allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, 'j.eqs.intra'),

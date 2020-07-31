@@ -37,7 +37,6 @@ const proxyHandler = new ProxyHandler();
 router.post('/save',
     async (req: Request, res: Response) => {
         try {
-            console.log(req.body, null, 2);
             const response = await proxyHandler.saveRoutes(req.body);
             res.send(response);
             logger.log({managing_route: req.url, payload: req.body, response, tag: "manager"});

@@ -30,6 +30,7 @@ router.use('/config', ConfigRouter);
 router.use('/strategies', StrategiesRouter);
 router.use('/features', FeaturesRouter);
 router.use('/feature-strategy', FeaturesStrategiesRouter);
+router.use('/strategy-options', FeaturesStrategiesRouter);
 
 // Docs endpoint
 router.use("/docs", SwaggerDocsRouter);

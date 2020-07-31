@@ -4,7 +4,6 @@ import validator from 'validator';
 import {Strategies} from "../models/Strategies";
 import {Features} from "../models/Features";
 
-
 export class FeaturesHandler {
 
     /**
@@ -43,7 +42,9 @@ export class FeaturesHandler {
 
         const isUpdate = apiData.hasOwnProperty("id");
 
-        apiData.name = validator.whitelist(apiData.name, 'a-zA-Z0-9-_');
+        if (apiData.name) {
+            apiData.name = validator.whitelist(apiData.name, 'a-zA-Z0-9-_');
+        }
         if (!isUpdate) {
             const uuid = require('uuid-v4');
             apiData.id = uuid();
@@ -53,7 +54,7 @@ export class FeaturesHandler {
             throw new InputValidationException('Invalid ID: ' + url);
         }
 
-        apiData.description = (apiData.description !== undefined) ? apiData.description : '';
+        // apiData.description = (apiData.description !== undefined) ? apiData.description : '';
         apiData.enabled = (apiData.enabled !== undefined) ? apiData.enabled : true;
 
         await Features.upsert(apiData);
@@ -67,7 +68,7 @@ export class FeaturesHandler {
     }
 
     /**
-     * get strategy by ID
+     * get feature by ID
      * @param  {string} id  uuid v4 format
      * @param  {string} url
      * @return {any}
@@ -82,7 +83,7 @@ export class FeaturesHandler {
                     {
                         model: Strategies,
                         attributes: ['id', 'name', 'description'],
-                        through: {attributes: ["parameters"]}
+                        through: {attributes: ["parameters", "features_id", "strategies_id"]}
                     }
                 ],
                 attributes: ['id', 'name', 'description', 'enabled']

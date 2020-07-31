@@ -3,6 +3,7 @@ import {NotFoundException} from "../exceptions/NotFoundException";
 import validator from 'validator';
 import {Strategies} from "../models/Strategies";
 import {Features} from "../models/Features";
+import {StratOptions} from "../models/StratOptions";
 
 
 export class StrategiesHandler {
@@ -63,7 +64,7 @@ export class StrategiesHandler {
             throw new InputValidationException('Invalid ID: ' + url);
         }
         const response = await Strategies.findByPk(id, {
-            include: [Features]
+            include: [Features, StratOptions]
         });
         if (response === null) {
             throw new NotFoundException("Strategy not found");

@@ -11,7 +11,10 @@ if (config.enableHelmet) {
         helmet(),
 
         // set header X-Frame-Options to deny against clickjacking
-        helmet.frameguard({action: 'deny'}),
+        helmet.frameguard({
+            action: 'allow-from',
+            domain: 'http://localhost:4201'
+        }),
 
         // set header X-Permitted-Cross-Domain-Policies: none
         // helmet.permittedCrossDomainPolicies(),

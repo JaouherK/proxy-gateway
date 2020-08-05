@@ -7,7 +7,7 @@ const defaultConfig = {
     clusters: getParamByDefault(process.env.CLUSTER_NUMBER, 1),
 
     // CORS config
-    allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, 'j.eqs.intra'),
+    allowedDomains: getParamByDefault(process.env.ALLOWED_DOMAINS, 'http://localhost:4201'),
     allowedHeaders: getParamByDefault(
         process.env.ALLOWED_HEADERS,
         ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token"]

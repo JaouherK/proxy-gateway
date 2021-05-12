@@ -71,7 +71,7 @@
     "sequelize-typescript": "^0.6.6-beta.1",
     "snyk": "^1.425.4",
     "swagger-jsdoc": "^4.0.0",
-    "swagger-parser": "^8.0.3",
+    "swagger-parser": "^9.0.0",
     "swagger-ui-express": "^4.1.4",
     "typescript": "^3.9.7",
     "uuid": "^3.2.1",
